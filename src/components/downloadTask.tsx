@@ -11,18 +11,25 @@ export const DownloadTask = ({ videoId, onCompleted }: DownloadTaskProps) => {
     const [downloadPercent, setDownloadPercent] = useState(0);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setDownloadPercent((downloadPercent) => {
-                if (downloadPercent >= 99) {
-                    clearInterval(interval);
-                }
+        let interval: NodeJS.Timer;
+        const timeout = setTimeout(() => {
+            interval = setInterval(() => {
+                setDownloadPercent((downloadPercent) => {
+                    if (downloadPercent >= 99) {
+                        clearInterval(interval);
+                    }
+    
+                    return downloadPercent + 10
+                });
+    
+            }, 1000);
+        }, 1000)
 
-                return downloadPercent + 1
-            });
 
-        }, 32);
-
-        return () => clearInterval(interval);
+        return () => {
+            clearTimeout(timeout);
+            clearInterval(interval);
+        }
     }, []);
 
     return (
