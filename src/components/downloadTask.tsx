@@ -19,11 +19,11 @@ export const DownloadTask = ({ videoId, onCompleted }: DownloadTaskProps) => {
                         clearInterval(interval);
                     }
     
-                    return downloadPercent + 10
+                    return downloadPercent + 5
                 });
     
-            }, 1000);
-        }, 1000)
+            }, 500);
+        }, 500)
 
 
         return () => {
@@ -35,7 +35,7 @@ export const DownloadTask = ({ videoId, onCompleted }: DownloadTaskProps) => {
     return (
     <>
         <div className="image-container">
-            <AnimatedClippedImage imageUrl={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`} percentage={downloadPercent} />
+            <AnimatedClippedImage imageUrl={`https://images7.alphacoders.com/341/thumb-1920-341882.jpg`} percentage={downloadPercent} />
             {downloadPercent}
         </div>
         <div className="progress-bar">
