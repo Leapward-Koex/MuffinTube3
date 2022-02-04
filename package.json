@@ -18,6 +18,7 @@
     "body-parser": "~1.5.2",
     "buffer": "^6.0.3",
     "constants-browserify": "^1.0.0",
+    "esbuild": "^0.14.18",
     "express": "~4.4.3",
     "http-proxy-agent": "^5.0.0",
     "https-browserify": "^1.0.0",
@@ -44,10 +45,12 @@
     "ytdl-core-browser": "^1.0.0"
   },
   "scripts": {
-    "start": "react-app-rewired start",
+    "start-react": "set BROWSER=none && react-scripts start",
+    "start-electron": "concurrently --kill-others \"npm run bundle-electron && set ELECTRON_START_URL=http://localhost:3000 && electron --inspect=5858 .\"",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "bundle-electron": "node ./electron-esbuild.js",
+    "build-electron-win": "npm run bundle-electron && mkdir build\\src && Xcopy /E /I /Y electron build\\electron",
+    "package-win": "npm run build && npm run build-electron-win && electron-builder build -c.extraMetadata.main=build/electron/main.js --publish never"
   },
   "eslintConfig": {
     "extends": [
@@ -68,6 +71,20 @@
     ]
   },
   "devDependencies": {
-    "react-app-rewired": "^2.1.11"
+    "concurrently": "^7.0.0",
+    "electron": "^17.0.0",
+    "electron-builder": "^22.14.5",
+    "react-app-rewired": "^2.1.11",
+    "webpack-cli": "^4.9.2"
+  },
+  "main": "electron/electron-bundle.js",
+  "homepage": "./",
+  "build": {
+    "appId": "com.example.electron-react",
+    "productName": "electron-react",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ]
   }
 }
