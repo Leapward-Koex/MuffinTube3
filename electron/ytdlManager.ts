@@ -43,8 +43,7 @@ export class YtdlManager {
     public async checkForUpdate() {
         const latestYtdlRelease = (await this.ytdlReleases)[0];
         const installedVersion = await this.getInstalledYtdlVersion();
-        debugger;
-        if (latestYtdlRelease.tag_name !== installedVersion) {
+        if (!installedVersion.version || latestYtdlRelease.tag_name !== installedVersion.version) {
             await this.installLatestVersion();
             await this.saveYtdlVersion(latestYtdlRelease.tag_name)
         }
@@ -93,7 +92,6 @@ export class YtdlManager {
     
                 let error;
                 // Any 2xx status code signals a successful response but
-                // here we're only checking for 200.
                 console.log('hello')
                 if (statusCode !== 200) {
                     error = new Error('Request Failed.\n' +
