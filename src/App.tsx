@@ -3,11 +3,12 @@ import { VideoInput } from './components/videoInput';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import { DownloadTask } from './components/downloadTask';
+import { electronJsApi } from './apiService/electronJsApi';
 
 export const App = () => {
 
     const onVideoSubmitted = async (videoId: string) => {
-
+        electronJsApi.startDownload(videoId)
     }
 
     return (

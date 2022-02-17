@@ -1,14 +1,24 @@
 import { app, BrowserWindow } from 'electron';
 import { ElectronNativeApi } from './electronNativeApi';
-const path = require('path');
-const url = require('url');
+import npm from 'npm'
+import ytdl from "ytdl-core";
+import { create as createYdDl, YtFlags } from 'youtube-dl-exec'
+import orderBy from 'lodash.orderby';
+import https from 'https'
+import fs from 'fs';
+import path from 'path'
+import os from 'os';
+import url from 'url'
+import { YtdlManager } from './ytdlManager';
 
+// Remove 'user:pass@' if you don't need to authenticate to your proxy.
 
 class MuffinTube {
     private mainWindow: BrowserWindow;
     private electronApi: ElectronNativeApi;
     
     constructor() {
+
         app.on('ready', this.createWindow);
 
         app.on('window-all-closed', () => {
@@ -22,10 +32,19 @@ class MuffinTube {
                 this.createWindow();
             }
         });
+        const downloadManager = new YtdlManager();
+        downloadManager.checkForUpdate();
     }
 
     private createWindow() {
-        this.mainWindow = new BrowserWindow({ width: 600, height: 600, show: false });
+        this.mainWindow = new BrowserWindow({ 
+            width: 600, height: 600, show: false,
+            webPreferences: {
+                nodeIntegration: false, // is default value after Electron v5
+                contextIsolation: true, // protect against prototype pollution
+                preload: path.join(__dirname, 'preload.js')
+            },
+        });
         this.mainWindow.webContents.openDevTools()
         this.mainWindow.loadURL(
             !app.isPackaged

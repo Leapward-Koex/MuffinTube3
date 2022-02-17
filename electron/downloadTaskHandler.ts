@@ -1,4 +1,5 @@
 import ytdl from "ytdl-core";
+import { create as createYtdl} from 'youtube-dl-exec'
 
 export class DownloadTaskHandler {
     constructor (
@@ -7,28 +8,19 @@ export class DownloadTaskHandler {
 
     }
 
-    public startTask (onData: (chunksLength: number) => void) {
+    public startTask (onData: (totalLength: number, resolvedLength: number) => void) {
+        const youtubedl = createYtdl();
         return new Promise<void>((resolve, reject) => {
-            const thumbnailUrl = `https://img.youtube.com/vi/l4WjAiBFYjw/maxresdefault.jpg`;
-            // let info = await ytdl.getInfo('5TZ5twGgu9Y');
-            // let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
-            debugger
-            const stream = ytdl(this.videoUrl);
-    
-            stream.on('data', chunk => {
-                console.log('downloaded', chunk.length);
-                onData(chunk.length);
-            });
-    
-            stream.on('error', err => {
-                console.error(err);
-                reject();
-            });
-    
-            stream.on('end', () => {
-                console.log('Finished');
-                resolve()
-            });
+            youtubedl(this.videoUrl, {
+                dumpSingleJson: true,
+                noWarnings: true,
+                noCheckCertificate: true,
+                preferFreeFormats: true,
+                youtubeSkipDashManifest: true,
+                referer: this.videoUrl
+            }).then(output => {
+                console.log(output)
+            })
         });
     }
 }
