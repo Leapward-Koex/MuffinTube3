@@ -3,10 +3,12 @@ import path from 'path'
 import { app } from 'electron'
 import fs from 'fs'
 import fetch from 'node-fetch'
+import { FfmpegConverter } from './ffmpegConverter';
 
 export class DownloadTaskHandler {
     constructor (
-        private videoUrl: string
+        private videoUrl: string,
+        private ffmpegConverter = new FfmpegConverter()
     ) {
 
     }
@@ -14,6 +16,8 @@ export class DownloadTaskHandler {
     public async startTask(onData: (totalLength: number, resolvedLength: number) => void) {
         const downloadInformation = await this.downloadAudio(onData);
         // Convert to mp3 (130Kb/s OPUS -> 256kb/s MP3)
+        const mp3Path = await this.ffmpegConverter.convertToMp3(downloadInformation.path, downloadInformation.title);
+        
         // Embed metadata
     }
 
