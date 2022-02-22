@@ -1,3 +1,4 @@
+import { Input } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useState } from 'react';
 
@@ -19,7 +20,7 @@ export const VideoInput = ({ onSubmit }: VideoInputProps) => {
         }
     }
 
-    const onKeyDownHandler = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const onKeyDownHandler = (event: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         if (event.key === "Enter") {
             const videoId = extractVideoId(videoUrl);
             if (videoId) {
@@ -28,5 +29,23 @@ export const VideoInput = ({ onSubmit }: VideoInputProps) => {
         }
     }
 
-    return <TextField style={{ width: '100%' }} autoFocus onKeyDown={(event) => onKeyDownHandler(event)} onChange={(event) => setVideoUrl(event.target.value)} id="outlined-basic" label="Outlined" variant="outlined" />
+    return <Input
+        autoFocus
+        onKeyDown={(event) => onKeyDownHandler(event)}
+        onChange={(event) => setVideoUrl(event.target.value)}
+        autoComplete='off'
+        style={{
+            backgroundColor: "white",
+            width: '100%',
+            height: '50px',
+            borderRadius: '10px'
+        }}
+        inputProps={{
+            style: {
+                color: "red"
+            }
+        }}
+        color="secondary"
+        id="outlined-basic"
+         />
 }

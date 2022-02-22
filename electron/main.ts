@@ -10,6 +10,8 @@ import path from 'path'
 import os from 'os';
 import url from 'url'
 import { YtdlManager } from './ytdlManager';
+import { FfmpegConverter } from './ffmpegConverter';
+import { Id3MetaDataTagger } from './id3MetaDataTagger';
 
 // Remove 'user:pass@' if you don't need to authenticate to your proxy.
 
@@ -32,8 +34,14 @@ class MuffinTube {
                 this.createWindow();
             }
         });
-        const downloadManager = new YtdlManager();
-        downloadManager.checkForUpdate();
+        // const downloadManager = new YtdlManager();
+        // downloadManager.checkForUpdate();
+
+        // const ffmpegConverter = new FfmpegConverter();
+        // ffmpegConverter.convertToMp3("C:\\Dev\\MuffinTube3\\temp\\【東方ボーカルENG SUB】little flare【A-ONE】.webm", "【東方ボーカルENG SUB】little flare【A-ONE】.webm");
+
+        const tagger = new Id3MetaDataTagger("C:\\Dev\\MuffinTube3\\temp\\【東方ボーカルENG SUB】little flare【A-ONE】.mp3", "https://i3.ytimg.com/vi/erLk59H86ww/maxresdefault.jpg");
+        tagger.embedTags();
     }
 
     private createWindow() {

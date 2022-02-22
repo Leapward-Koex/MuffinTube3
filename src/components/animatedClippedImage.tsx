@@ -35,7 +35,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
     const prevCount = usePrevious(percentage);
 
     function easeing(x: number): number {
-        return -(Math.cos(Math.PI * x) - 1) / 2;
+        return -(Math.cos(Math.PI * x) - 1) / 2; //easeInOutSine
     }
 
     const animate = useCallback((time: DOMHighResTimeStamp) => {
@@ -61,7 +61,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
             requestRef.current = requestAnimationFrame(animate);
         }
 
-    }, [canvas, image, imageLoaded, percentage, prevCount])
+    }, [canvas, image, imageLoaded, percentage, prevCount]);
 
     useEffect(() => {
         requestRef.current = requestAnimationFrame(animate);
@@ -71,9 +71,9 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
     }, [animate]);
 
     return (
-        <div style={{ position: 'relative' }}>
-            <img ref={imageRef} src={imageUrl} onLoad={() => setImageLoaded(true)} style={{ filter: 'grayscale(100%) blur(1px) brightness(0.8)', display: imageLoaded ? 'block' : 'none', position: 'absolute' }}>
+        <div style={{ position: 'relative', height: '300px' }}>
+            <img ref={imageRef} src={imageUrl} onLoad={() => setImageLoaded(true)} style={{ filter: 'grayscale(100%) blur(1px) brightness(0.8)', display: imageLoaded ? 'block' : 'none', position: 'absolute', height: '100%', width: '100%', objectFit: 'cover' }}>
             </img>
-            <canvas ref={canvasRef} width={imageWidth} height={imageHeight} style={{ display: imageLoaded ? 'block' : 'none', position: 'absolute' }} />
+            <canvas ref={canvasRef} width={imageWidth} height={imageHeight} style={{ display: imageLoaded ? 'block' : 'none', position: 'absolute', height: '100%', width: '100%', objectFit: 'cover'}} />
         </div>);
 }

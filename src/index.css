@@ -1,13 +1,38 @@
+html {
+    height: 100%;
+}
 body {
   margin: 0;
+  height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #e84393;
+  background-image: linear-gradient(0deg, #e84393 0%, #000000 74%);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+@font-face {
+    font-family: 'Lazer84';
+    src: local('Lazer84'), url(./fonts/Lazer84.ttf) format('truetype');
+    /* other formats include: 'woff2', 'truetype, 'opentype',
+                              'embedded-opentype', and 'svg' */
+}
+  
+  .lazer84{
+    font-family:'Lazer84';
+    font-size:40pt;
+    letter-spacing:0.2em;
+    color:#b70077;
+    filter:url(#fakeHalftone);
+    line-height:0.9em;
+  }
+  .lazer84:first-letter {
+    font-size:1.5em;
+  }

@@ -4,11 +4,19 @@ import { app } from 'electron'
 import fs from 'fs'
 import fetch from 'node-fetch'
 import { FfmpegConverter } from './ffmpegConverter';
+import { Id3MetaDataTagger } from './id3MetaDataTagger';
+
+export interface VideoMetaData {
+    path: string,
+    thumbnail: string,
+    title: string
+}
 
 export class DownloadTaskHandler {
     constructor (
         private videoUrl: string,
-        private ffmpegConverter = new FfmpegConverter()
+        private ffmpegConverter = new FfmpegConverter(),
+        private tagger = new Id3MetaDataTagger()
     ) {
 
     }
@@ -17,14 +25,14 @@ export class DownloadTaskHandler {
         const downloadInformation = await this.downloadAudio(onData);
         // Convert to mp3 (130Kb/s OPUS -> 256kb/s MP3)
         const mp3Path = await this.ffmpegConverter.convertToMp3(downloadInformation.path, downloadInformation.title);
-        
+        await this.tagger.embedTags(mp3Path, downloadInformation)
         // Embed metadata
     }
 
     private downloadAudio(onData: (totalLength: number, resolvedLength: number) => void) {
         const ytdlPath = path.join(app.getAppPath(), 'electron', 'ytdl', 'youtube-dl.exe')
         const youtubedl = createYtdl(ytdlPath);
-        return new Promise<{path: string, thumbnail: string, title: string}>((resolve, reject) => {
+        return new Promise<VideoMetaData>((resolve, reject) => {
             youtubedl(this.videoUrl, {
                 dumpSingleJson: true,
                 noWarnings: true,
