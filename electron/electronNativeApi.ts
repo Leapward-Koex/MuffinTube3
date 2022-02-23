@@ -1,6 +1,8 @@
 import { BrowserWindow, ipcMain } from "electron";
 import { DownloadTaskHandler } from "./downloadTaskHandler";
 import throttle from 'lodash.throttle';
+import storage from 'electron-json-storage'
+import { AnyRecord } from "dns";
 
 export interface DownloadTaskStartType {
     videoUrl: string,
@@ -12,7 +14,19 @@ export interface DownloadTaskUpdateType {
     percentageComplete: number
 }
 
-export interface DownloadTaskFinished {
+export interface GetSettingPayload {
+    callbackId: string,
+    settingKey: string
+}
+
+export interface GetSettingValuePayload {
+    callbackId: string;
+    value: any;
+}
+
+export type SetSettingPayload = GetSettingPayload & GetSettingValuePayload;
+
+export interface VoidCallbackPayload {
     callbackId: string
 }
 
@@ -28,6 +42,24 @@ export class ElectronNativeApi {
         ipcMain.on('startDownloadTask', (event, message: DownloadTaskStartType) => {
             this.addTask(message.videoUrl, message.callbackId)
         });
+        ipcMain.on('getSetting', (event, message: GetSettingPayload) => {
+            storage.get(message.settingKey, (error, data) => {
+                if (error) {
+                    throw new Error(error)
+                }
+                const getSettingValuePayload: GetSettingValuePayload = { ...message, value: (data as any).value };
+                this.window.webContents.send('getSetting', getSettingValuePayload)
+            });
+        });
+        ipcMain.on('setSetting', (event, message: SetSettingPayload) => {
+            storage.set(message.settingKey, { value: message.value }, (error) => {
+                if (error) {
+                    throw new Error(error);
+                }
+                const setSettingPayload: VoidCallbackPayload = { callbackId: message.callbackId };
+                this.window.webContents.send('voidCallback', setSettingPayload)
+            });
+        });
     }
 
     public addTask(videoUrl: string, callbackId: string) {
@@ -39,7 +71,7 @@ export class ElectronNativeApi {
             this.window.webContents.send('downloadTaskProgress', downloadTaskUpdate)
         });
         downloadHandler.startTask(throttledHandler).then(() => {
-            const downloadTaskFinishedMessage: DownloadTaskFinished = { callbackId };
+            const downloadTaskFinishedMessage: VoidCallbackPayload = { callbackId };
             this.window.webContents.send('downloadTaskFinished', downloadTaskFinishedMessage)
         });
     }

@@ -8,6 +8,9 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { DownloadTask } from './components/downloadTask';
 import { electronJsApi } from './apiService/electronJsApi';
 import { StrictMode } from 'react';
+import SettingsIcon from '@mui/icons-material/Settings';
+import Fab from '@mui/material/Fab';
+import { Settings } from './components/settings';
 
 const padding = '20px';
 export const App = () => {
@@ -31,6 +34,9 @@ export const App = () => {
         <StrictMode>
             <ThemeProvider theme={theme}>
                 <Container className="App">
+                    <div className='settingContainer' style={{position: 'absolute', top: 10, left: 10}}>
+                        <Settings />
+                    </div>
                     <div className='title' style={{ padding: '20px' }}>
                         <div className="centered">
                             <div className="lazer84">MuffinTube-3</div>
@@ -113,14 +119,6 @@ export const App = () => {
                         <VideoInput onSubmit={(videoId) => onVideoSubmitted(videoId)}></VideoInput>
                     </div>
                     <Stack spacing={2} className="downloads-container">
-                        <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
-                        <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
-                        <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
-                        <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
-                        <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
-                        <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
-                        <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
-                        <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
                         <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
                     </Stack>
                 </Container >
