@@ -34,14 +34,6 @@ class MuffinTube {
                 this.createWindow();
             }
         });
-        // const downloadManager = new YtdlManager();
-        // downloadManager.checkForUpdate();
-
-        // const ffmpegConverter = new FfmpegConverter();
-        // ffmpegConverter.convertToMp3("C:\\Dev\\MuffinTube3\\temp\\【東方ボーカルENG SUB】little flare【A-ONE】.webm", "【東方ボーカルENG SUB】little flare【A-ONE】.webm");
-
-        const tagger = new Id3MetaDataTagger("C:\\Dev\\MuffinTube3\\temp\\【東方ボーカルENG SUB】little flare【A-ONE】.mp3", "https://i3.ytimg.com/vi/erLk59H86ww/maxresdefault.jpg");
-        tagger.embedTags();
     }
 
     private createWindow() {

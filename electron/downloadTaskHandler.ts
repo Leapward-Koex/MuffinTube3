@@ -3,8 +3,10 @@ import path from 'path'
 import { app } from 'electron'
 import fs from 'fs'
 import fetch from 'node-fetch'
+import mv from 'mv'
 import { FfmpegConverter } from './ffmpegConverter';
 import { Id3MetaDataTagger } from './id3MetaDataTagger';
+import storage from 'electron-json-storage'
 
 export interface VideoMetaData {
     path: string,
@@ -23,10 +25,29 @@ export class DownloadTaskHandler {
 
     public async startTask(onData: (totalLength: number, resolvedLength: number) => void) {
         const downloadInformation = await this.downloadAudio(onData);
-        // Convert to mp3 (130Kb/s OPUS -> 256kb/s MP3)
         const mp3Path = await this.ffmpegConverter.convertToMp3(downloadInformation.path, downloadInformation.title);
         await this.tagger.embedTags(mp3Path, downloadInformation)
-        // Embed metadata
+        await this.moveToDownloadDirectory(mp3Path, downloadInformation.title)
+    }
+
+    private moveToDownloadDirectory(mp3Path: string, audioTitle: string) {
+        return new Promise<void>((resolve) => {
+            storage.get('downloadPath', (storageError, data) => {
+                if (storageError) {
+                    throw new Error(storageError)
+                }
+                if (!(data as any).value) {
+                    throw new Error('Download destination not set!');
+                }
+                const destinationPath = path.join((data as any).value, `${audioTitle}.mp3`);
+                mv(mp3Path, destinationPath, { mkdirp: true, clobber: true }, (error) => {
+                    if (error) {
+                        throw new Error(error);
+                    }
+                    resolve();
+                })
+            });
+        }) 
     }
 
     private downloadAudio(onData: (totalLength: number, resolvedLength: number) => void) {
