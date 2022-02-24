@@ -10,19 +10,25 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Fab from '@mui/material/Fab';
 import Button from '@mui/material/Button';
+import { electronJsApi } from '../apiService/electronJsApi';
 
 export const Settings = () => {
     const [open, setOpen] = useState(false);
     const [downloadLocation, setDownloadLocation] = useState('');
 
     const handleClickOpen = () => {
-        setOpen(true);
+        electronJsApi.getSetting('downloadPath').then((savedDownloadLocation) => {
+            if (savedDownloadLocation) {
+                setDownloadLocation(savedDownloadLocation);
+            }
+            setOpen(true);
+        });
     };
 
     const handleClose = (savePath: boolean) => {
         setOpen(false);
         if (savePath) {
-
+            electronJsApi.setSetting('downloadPath', downloadLocation)
         }
     };
 
@@ -51,6 +57,7 @@ export const Settings = () => {
                         fullWidth
                         autoComplete='off'
                         variant="standard"
+                        value={downloadLocation}
                         onChange={(event) => setDownloadLocation(event.target.value)}
                     />
                 </DialogContent>

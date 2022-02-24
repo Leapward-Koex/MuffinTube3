@@ -42,7 +42,15 @@ class ElectronJsApi {
         return new Promise<string>((resolve, reject) => {
             const callbackId = this.generateCallbackId();
             this.callbacks[callbackId] = { resolve, reject };
-            window.api?.send('getSetting', { callbackId: this.generateCallbackId(), settingKey })
+            window.api?.send('getSetting', { callbackId, settingKey })
+        });
+    }
+
+    public setSetting(settingKey: string, value: any) {
+        return new Promise<void>((resolve, reject) => {
+            const callbackId = this.generateCallbackId();
+            this.callbacks[callbackId] = { resolve, reject };
+            window.api?.send('setSetting', { callbackId, settingKey, value })
         });
     }
 
