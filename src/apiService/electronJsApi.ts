@@ -1,13 +1,17 @@
-import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, GetSettingValuePayload, SetSettingPayload, GetSettingPayload } from '../../electron/electronNativeApi'
+import { YtResponse } from 'youtube-dl-exec';
+import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, GetSettingValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload } from '../../electron/electronNativeApi'
 
 interface JsExposedApi {
     send(channel: 'startDownloadTask', params: DownloadTaskStartType): void;
     send(channel: 'getSetting', params: GetSettingPayload): void;
     send(channel: 'setSetting', params: SetSettingPayload): void;
+    receive(channel: 'downloadTaskMetaData', callback: (data: DownloadTaskMetaDataPayload) => void): void;
     receive(channel: 'downloadTaskProgress', callback: (data: DownloadTaskUpdateType) => void): void;
+    receive(channel: 'downloadTaskDownloaded', callback: (data: VoidCallbackPayload) => void): void;
+    receive(channel: 'downloadTaskFinished', callback: (data: VoidCallbackPayload) => void): void;
     receive(channel: 'voidCallback', callback: (data: VoidCallbackPayload) => void): void;
     receive(channel: 'getSetting', callback: (data: GetSettingValuePayload) => void): void;
-} 
+}
 
 declare global {
     interface Window { 
@@ -17,25 +21,64 @@ declare global {
 
 class ElectronJsApi {
     private callbacks: {[callbackId: string]: { resolve: Function, reject: Function }} = {};
+    private onDataCallbacks: {[callbackId: string]: (percentageComplete: number) => void} = {};
 
     constructor () {
+        window.api?.receive('downloadTaskMetaData', (message) => {
+            console.log(message);
+            this.callbacks[`meta-data-${message.callbackId}`].resolve(message.metaData);
+            delete this.callbacks[`meta-data-${message.callbackId}`];
+        });
         window.api?.receive('downloadTaskProgress', (message) => {
-            console.log(message)
+            console.log(message);
+            this.onDataCallbacks[message.callbackId]?.(message.percentageComplete);
+        });
+        window.api?.receive('downloadTaskDownloaded', (message) => {
+            console.log(message);
+            this.callbacks[`downloaded-${message.callbackId}`].resolve();
+            delete this.callbacks[`downloaded-${message.callbackId}`];
+            delete this.onDataCallbacks[message.callbackId];
+        });
+        window.api?.receive('downloadTaskFinished', (message) => {
+            console.log(message);
+            this.callbacks[message.callbackId].resolve();
+            delete this.callbacks[message.callbackId];
         });
 
         window.api?.receive('voidCallback', (message) => {
             console.log(message);
-            this.callbacks[message.callbackId]?.resolve();
+            this.callbacks[message.callbackId].resolve();
+            delete this.callbacks[message.callbackId];
         });
-
         window.api?.receive('getSetting', (message) => {
             console.log(message);
             this.callbacks[message.callbackId]?.resolve(message.value);
+            delete this.callbacks[message.callbackId];
         });
     }
 
-    public startDownload(videoUrl: string) {
-        window.api?.send('startDownloadTask', { videoUrl, callbackId: this.generateCallbackId() })
+    public startDownloadTask(
+        videoUrl: string,
+        onData: (percentageComplete: number) => void,
+    ) {
+        const callbackId = this.generateCallbackId();
+        return {
+            taskFinished: new Promise<void>((resolve, reject) => {
+                this.callbacks[callbackId] = { resolve, reject };
+                this.onDataCallbacks[callbackId] = onData;
+                window.api?.send('startDownloadTask', { videoUrl, callbackId })
+            }),
+            metaData: new Promise<YtResponse>((resolve, reject) => {
+                this.callbacks[`meta-data-${callbackId}`] = { resolve, reject };
+            }),
+            downloaded: new Promise<void>((resolve, reject) => {
+                this.callbacks[`downloaded-${callbackId}`] = { resolve, reject };
+            }),
+            onData: ((onDataHandler: (percentageComplete: number) => void) => {
+                this.onDataCallbacks[callbackId] = onDataHandler;
+            }),
+            callbackId
+        };
     }
 
     public getSetting(settingKey: string) {

@@ -1,4 +1,4 @@
-import { create as createYtdl} from 'youtube-dl-exec'
+import { create as createYtdl, YtResponse} from 'youtube-dl-exec'
 import path from 'path'
 import { app } from 'electron'
 import fs from 'fs'
@@ -15,6 +15,7 @@ export interface VideoMetaData {
 }
 
 export class DownloadTaskHandler {
+    private ytdlPath = path.join(app.getAppPath(), 'electron', 'ytdl', 'youtube-dl.exe');
     constructor (
         private videoUrl: string,
         private ffmpegConverter = new FfmpegConverter(),
@@ -23,11 +24,24 @@ export class DownloadTaskHandler {
 
     }
 
-    public async startTask(onData: (totalLength: number, resolvedLength: number) => void) {
-        const downloadInformation = await this.downloadAudio(onData);
-        const mp3Path = await this.ffmpegConverter.convertToMp3(downloadInformation.path, downloadInformation.title);
-        await this.tagger.embedTags(mp3Path, downloadInformation)
-        await this.moveToDownloadDirectory(mp3Path, downloadInformation.title)
+    public async startTask(
+        onMetaData: (metaData: YtResponse) => void,
+        onData: (totalLength: number, resolvedLength: number) => void,
+        onDownloadComplete: () => void
+    ) {
+        const metaData = await this.getMetaData();
+        onMetaData(metaData);
+        const opusPath = await this.downloadAudio(
+            metaData.filesize,
+            metaData.url,
+            metaData.title,
+            metaData.ext,
+            onData
+        );
+        onDownloadComplete();
+        const mp3Path = await this.ffmpegConverter.convertToMp3(opusPath, metaData.title);
+        await this.tagger.embedTags(mp3Path, metaData.thumbnail)
+        await this.moveToDownloadDirectory(mp3Path, metaData.title)
     }
 
     private moveToDownloadDirectory(mp3Path: string, audioTitle: string) {
@@ -50,47 +64,43 @@ export class DownloadTaskHandler {
         }) 
     }
 
-    private downloadAudio(onData: (totalLength: number, resolvedLength: number) => void) {
-        const ytdlPath = path.join(app.getAppPath(), 'electron', 'ytdl', 'youtube-dl.exe')
-        const youtubedl = createYtdl(ytdlPath);
-        return new Promise<VideoMetaData>((resolve, reject) => {
-            youtubedl(this.videoUrl, {
-                dumpSingleJson: true,
-                noWarnings: true,
-                noCheckCertificate: true,
-                format: 'bestaudio',
-                youtubeSkipDashManifest: true,
-                referer: this.videoUrl
-            }).then(output => {
-                const { thumbnail, title, ext, filesize } = output;
-                const fileName = `${title}.${ext}`;
-                const destinationPath =  path.join(app.getAppPath(), 'temp', fileName)
+    private getMetaData() {
+        const youtubedl = createYtdl(this.ytdlPath);
+        return youtubedl(this.videoUrl, {
+            dumpSingleJson: true,
+            noWarnings: true,
+            noCheckCertificate: true,
+            format: 'bestaudio',
+            youtubeSkipDashManifest: true,
+            referer: this.videoUrl
+        });
+    }
 
-                fs.open(destinationPath, "wx", function (openError, fd) {
-                    if (openError) throw openError;
-                    fs.close(fd, function (closeError) {
-                        if (closeError) throw closeError;
-                        fetch(output.url).then((response) => {
-                            let resolvedLength = 0;
-                            const fileStream = fs.createWriteStream(destinationPath);
-                            response.body!.on('error', reject);
-                            response.body!.on('data', (data: Buffer) => {
-                                resolvedLength += data.length;
-                                onData(filesize, resolvedLength);
-                            });
-                            fileStream.on('finish', () => {
-                                console.log('done!');
-                                resolve({
-                                    path: destinationPath,
-                                    thumbnail,
-                                    title
-                                });
-                            });
-                            response.body!.pipe(fileStream);
+    private downloadAudio(fileSize: number, downloadUrl: string, videoTitle: string, formatExtension: string, onData: (totalLength: number, resolvedLength: number) => void) {
+        return new Promise<string>((resolve, reject) => {
+            const fileName = `${videoTitle}.${formatExtension}`;
+            const destinationPath =  path.join(app.getAppPath(), 'temp', fileName)
+
+            fs.open(destinationPath, "wx", function (openError, fd) {
+                if (openError) throw openError;
+                fs.close(fd, function (closeError) {
+                    if (closeError) throw closeError;
+                    fetch(downloadUrl).then((response) => {
+                        let resolvedLength = 0;
+                        const fileStream = fs.createWriteStream(destinationPath);
+                        response.body!.on('error', reject);
+                        response.body!.on('data', (data: Buffer) => {
+                            resolvedLength += data.length;
+                            onData(fileSize, resolvedLength);
                         });
+                        fileStream.on('finish', () => {
+                            console.log('done!');
+                            resolve(destinationPath);
+                        });
+                        response.body!.pipe(fileStream);
                     });
                 });
-            })
+            });
         });
     }
 }

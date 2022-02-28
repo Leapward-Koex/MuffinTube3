@@ -4,9 +4,9 @@ import ID3Writer from 'browser-id3-writer';
 import { VideoMetaData } from './downloadTaskHandler';
 
 export class Id3MetaDataTagger {    
-    public async embedTags(mp3Path: string, videoInformation: VideoMetaData) {
+    public async embedTags(mp3Path: string, thumbnailUrl: string) {
         const mp3Buffer = await this.readMp3File(mp3Path);
-        const thumbnailBuffer = await this.downloadThumbnail(videoInformation.thumbnail);
+        const thumbnailBuffer = await this.downloadThumbnail(thumbnailUrl);
         const writer = new ID3Writer(mp3Buffer) as any; // https://www.npmjs.com/package/browser-id3-writer
         writer.setFrame('TIT2', 'Home')
             .setFrame('TPE1', ['My Artist'])

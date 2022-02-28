@@ -11,12 +11,41 @@ import { StrictMode } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Fab from '@mui/material/Fab';
 import { Settings } from './components/settings';
+import { useState } from 'react';
 
 const padding = '20px';
 export const App = () => {
+    const [downloadTasks, setDownloadTasks] = useState<{ videoCallbackId: string, thumbnailUrl: string, percentComplete: number, status: string }[]>([]);
 
-    const onVideoSubmitted = async (videoId: string) => {
-        electronJsApi.startDownload(videoId)
+    const onVideoSubmitted = async (videoUrl: string) => {
+        const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl, (percentageComplete) => {
+            console.log(percentageComplete)
+        });
+        videoDownloadTask.metaData.then((metaData) => {
+            downloadTasks.push({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: metaData.thumbnail, percentComplete: 0, status: 'Downloading...'});
+            setDownloadTasks([...downloadTasks]);
+        });
+        videoDownloadTask.downloaded.then(() => {
+            const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
+            if (matchingTask) {
+                matchingTask.status = 'Converting...';
+                setDownloadTasks([...downloadTasks]);
+            }
+        })
+        videoDownloadTask.onData((percentageComplete) => {
+            const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
+            if (matchingTask) {
+                matchingTask.percentComplete = percentageComplete;
+                setDownloadTasks([...downloadTasks]);
+            }
+        });
+        videoDownloadTask.taskFinished.then(() => {
+            const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
+            if (matchingTask) {
+                matchingTask.status = 'Finished!';
+                setDownloadTasks([...downloadTasks]);
+            }
+        });
     }
 
     const theme = createTheme({
@@ -116,10 +145,12 @@ export const App = () => {
                         </svg>
                     </div>
                     <div className="video-input-container" style={{ padding }}>
-                        <VideoInput onSubmit={(videoId) => onVideoSubmitted(videoId)}></VideoInput>
+                        <VideoInput onSubmit={(videoUrl) => onVideoSubmitted(videoUrl)}></VideoInput>
                     </div>
                     <Stack spacing={2} className="downloads-container">
-                        <DownloadTask videoId={'l4WjAiBFYjw'} onCompleted={() => { }} />
+                        {downloadTasks.map((downloadTask, index) => {
+                            return <DownloadTask key={index} thumbnailUrl={downloadTask.thumbnailUrl} percentageCompleted={downloadTask.percentComplete} status={downloadTask.status} />
+                        })}
                     </Stack>
                 </Container >
             </ThemeProvider>

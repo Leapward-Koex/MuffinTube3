@@ -9,22 +9,10 @@ type VideoInputProps = {
 export const VideoInput = ({ onSubmit }: VideoInputProps) => {
     const [videoUrl, setVideoUrl] = useState('');
 
-    const extractVideoId = (url: string) => {
-        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        if (match && match[7].length === 11 || true) {
-            return 'true';
-        }
-        else {
-            alert("Could not extract video ID.");
-        }
-    }
-
     const onKeyDownHandler = (event: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         if (event.key === "Enter") {
-            const videoId = extractVideoId(videoUrl);
-            if (videoId) {
-                onSubmit(videoId)
+            if (videoUrl) {
+                onSubmit(videoUrl);
             }
         }
     }

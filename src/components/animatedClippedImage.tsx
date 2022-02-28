@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 type AnimatedClippedImageProps = {
     imageUrl: string;
-    percentage: number;
+    percentage: number; // 0 - 100
 }
 
 export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedImageProps) => {
@@ -56,7 +56,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
                 }
             }
         }
-        if (percentage < 100) {
+        if (percentage <= 100) {
             previousTimeRef.current = time;
             requestRef.current = requestAnimationFrame(animate);
         }

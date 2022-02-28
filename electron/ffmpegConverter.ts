@@ -10,6 +10,7 @@ export class FfmpegConverter {
     public convertToMp3(opusPath: string, title: string) {
         return new Promise<string>((resolve) => {
             const outputFileName = `${title}.mp3`;
+            const destinationPath = path.join(app.getAppPath(), 'temp', outputFileName);
             this.convertJob = execFile( path.join(app.getAppPath(), 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'), [
                 '-i',
                 opusPath,
@@ -17,10 +18,10 @@ export class FfmpegConverter {
                 'libmp3lame',
                 '-q:a',
                 '0',
-                "C:\\Dev\\MuffinTube3\\temp\\" + outputFileName
+                destinationPath
             ], (error, stdout, stderr) => {
                 if (error) throw error;
-                resolve(outputFileName); // todo resolve correct path too
+                resolve(destinationPath);
                 console.log(stdout);
             });
         })
