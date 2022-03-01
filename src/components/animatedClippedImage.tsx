@@ -8,6 +8,8 @@ type AnimatedClippedImageProps = {
 
 export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedImageProps) => {
     const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageHeight, setImageHeight] = useState(0);
+    const [imageWidth, setImageWidth] = useState(0);
 
     const animationElapsedRef = useRef(0);
     const previousImageWidth = useRef(0);
@@ -20,8 +22,6 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
     const canvas = canvasRef.current;
     const image = imageRef.current;
 
-    const imageWidth = 1920;
-    const imageHeight = 1200;
     const timeToAnimateBlock = 400;
 
     function usePrevious(value: number) {
@@ -34,15 +34,21 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
 
     const prevCount = usePrevious(percentage);
 
-    function easeing(x: number): number {
+    const easeing = (x: number) => {
         return -(Math.cos(Math.PI * x) - 1) / 2; //easeInOutSine
+    }
+
+    const onImageLoaded = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        setImageHeight(event.currentTarget.height);
+        setImageWidth(event.currentTarget.width);
+        setImageLoaded(true);
     }
 
     const animate = useCallback((time: DOMHighResTimeStamp) => {
         if (previousTimeRef.current !== undefined) {
-            const deltaTime = time - previousTimeRef.current; // time elapse in ms
-            animationElapsedRef.current += deltaTime; // time elapsed since start of animation
-            const deltaPercent = percentage - prevCount; // how far we need to animate in 500ms (in percent of total width)
+            const deltaTime = time - previousTimeRef.current; // Time elapsed in ms
+            animationElapsedRef.current += deltaTime; // Time elapsed since start of animation
+            const deltaPercent = percentage - prevCount; // Percent of total width of how far we need to animate in timeToAnimateBlock in ms
             const animationElapsedPercent = easeing(animationElapsedRef.current / timeToAnimateBlock); // Percent of how far we're though the animation
             const newPercent = (animationElapsedPercent * deltaPercent) + prevCount;
 
@@ -61,7 +67,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
             requestRef.current = requestAnimationFrame(animate);
         }
 
-    }, [canvas, image, imageLoaded, percentage, prevCount]);
+    }, [canvas, image, imageHeight, imageLoaded, imageWidth, percentage, prevCount]);
 
     useEffect(() => {
         requestRef.current = requestAnimationFrame(animate);
@@ -72,7 +78,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
 
     return (
         <div style={{ position: 'relative', height: '300px' }}>
-            <img ref={imageRef} src={imageUrl} onLoad={() => setImageLoaded(true)} style={{ filter: 'grayscale(100%) blur(1px) brightness(0.8)', display: imageLoaded ? 'block' : 'none', position: 'absolute', height: '100%', width: '100%', objectFit: 'cover' }}>
+            <img ref={imageRef} src={imageUrl} onLoad={(event) => onImageLoaded(event)} style={{ filter: 'grayscale(100%) blur(1px) brightness(0.8)', display: imageLoaded ? 'block' : 'none', position: 'absolute', height: '100%', width: '100%', objectFit: 'cover' }}>
             </img>
             <canvas ref={canvasRef} width={imageWidth} height={imageHeight} style={{ display: imageLoaded ? 'block' : 'none', position: 'absolute', height: '100%', width: '100%', objectFit: 'cover'}} />
         </div>);
