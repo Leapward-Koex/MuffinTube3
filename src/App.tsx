@@ -26,10 +26,10 @@ export const App = () => {
         }
     }
 
-    const onVideoSubmitted = async (videoUrl: string) => {
+    const onVideoSubmitted = async (videoUrl: string, thumbnailUrl: string) => {
         const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl);
 
-        downloadTasks.push({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData});
+        downloadTasks.push({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl, percentComplete: 0, status: DownloadStatus.AcquiringMetaData});
         setDownloadTasks([...downloadTasks]);
 
         videoDownloadTask.metaData.then((metaData) => {
@@ -157,7 +157,7 @@ export const App = () => {
                         </svg>
                     </div>
                     <div className="video-input-container" style={{ padding }}>
-                        <VideoInput onSubmit={(videoUrl) => onVideoSubmitted(videoUrl)}></VideoInput>
+                        <VideoInput onSubmit={(videoUrl, thumbnailUrl) => onVideoSubmitted(videoUrl, thumbnailUrl)}></VideoInput>
                     </div>
                     <Stack spacing={2} className="downloads-container">
                         {downloadTasks.map((downloadTask, index) => {

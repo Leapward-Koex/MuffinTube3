@@ -17,7 +17,7 @@ export class Id3MetaDataTagger {
             });
         writer.addTag();
         
-        this.writeMp3File(mp3Path, Buffer.from(writer.arrayBuffer))
+        await this.writeMp3File(mp3Path, Buffer.from(writer.arrayBuffer))
     }
 
     private async downloadThumbnail(thumbnailUrl: string) {
@@ -36,7 +36,7 @@ export class Id3MetaDataTagger {
 
     private writeMp3File(mp3Path: string, buffer: Buffer) {
         return new Promise<void>((resolve) => {
-            fs.writeFile(mp3Path + "tagged.mp3", buffer, (err) => {
+            fs.writeFile(mp3Path, buffer, (err) => {
                 if (err) throw err
                 resolve();
             });
