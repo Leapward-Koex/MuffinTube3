@@ -7,7 +7,7 @@ import mv from 'mv'
 import { FfmpegConverter } from './ffmpegConverter';
 import { Id3MetaDataTagger } from './id3MetaDataTagger';
 import storage from 'electron-json-storage'
-import { ensureEmptyFileExists } from './fileUtilities'
+import { deleteFile, ensureEmptyFileExists } from './fileUtilities'
 
 export interface VideoMetaData {
     path: string,
@@ -17,6 +17,9 @@ export interface VideoMetaData {
 
 export class DownloadTaskHandler {
     private ytdlPath = path.join(app.getAppPath(), 'electron', 'ytdl', 'youtube-dl.exe');
+    private abortController = new AbortController()
+    private mp3Path: string | undefined
+    private audioPath: string | undefined
     constructor (
         private videoUrl: string,
         private ffmpegConverter = new FfmpegConverter(),
@@ -32,7 +35,7 @@ export class DownloadTaskHandler {
     ) {
         const metaData = await this.getMetaData();
         onMetaData(metaData);
-        const audioPath = await this.downloadAudio(
+        this.audioPath = await this.downloadAudio(
             metaData.filesize,
             metaData.url,
             metaData.title,
@@ -40,9 +43,22 @@ export class DownloadTaskHandler {
             onData
         );
         onDownloadComplete();
-        const mp3Path = await this.ffmpegConverter.convertToMp3(audioPath, metaData.title);
-        await this.tagger.embedTags(mp3Path, metaData.thumbnail)
-        await this.moveToDownloadDirectory(mp3Path, metaData.title)
+        this.mp3Path = await this.ffmpegConverter.convertToMp3(this.audioPath, metaData.title);
+        await this.tagger.embedTags(this.mp3Path, metaData.thumbnail);
+        await this.moveToDownloadDirectory(this.mp3Path, metaData.title);
+        await deleteFile(this.audioPath);
+        await deleteFile(this.mp3Path);
+    }
+
+    public async abort() {
+        this.abortController.abort();
+        this.ffmpegConverter.abortJob();
+        if (this.audioPath) {
+            await deleteFile(this.audioPath)
+        }
+        if (this.mp3Path) {
+            await deleteFile(this.mp3Path)
+        }
     }
 
     private moveToDownloadDirectory(mp3Path: string, audioTitle: string) {
@@ -83,7 +99,7 @@ export class DownloadTaskHandler {
             const destinationPath =  path.join(app.getAppPath(), 'temp', fileName)
 
             await ensureEmptyFileExists(destinationPath);
-            fetch(downloadUrl).then((response) => {
+            fetch(downloadUrl, { signal: this.abortController.signal }).then((response) => {
                 let resolvedLength = 0;
                 const fileStream = fs.createWriteStream(destinationPath);
                 response.body!.on('error', reject);

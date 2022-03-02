@@ -3,6 +3,7 @@ import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, Get
 
 interface JsExposedApi {
     send(channel: 'startDownloadTask', params: DownloadTaskStartType): void;
+    send(channel: 'abortDownload', params: VoidCallbackPayload): void;
     send(channel: 'getSetting', params: GetSettingPayload): void;
     send(channel: 'setSetting', params: SetSettingPayload): void;
     receive(channel: 'downloadTaskMetaData', callback: (data: DownloadTaskMetaDataPayload) => void): void;
@@ -77,6 +78,10 @@ class ElectronJsApi {
             }),
             callbackId
         };
+    }
+
+    public abortDownload(callbackId: string) {
+        window.api?.send('abortDownload', { callbackId })
     }
 
     public getSetting(settingKey: string) {

@@ -9,6 +9,7 @@ export interface DownloadTaskStartType {
     callbackId: string;
 }
 
+
 export interface DownloadTaskUpdateType {
     callbackId: string;
     percentageComplete: number;
@@ -37,6 +38,8 @@ export interface DownloadTaskMetaDataPayload {
 
 export class ElectronNativeApi {
 
+    private downloadTasks: {[callbackId: string]: DownloadTaskHandler} = {};
+
     constructor (
         private window: BrowserWindow
     ) {
@@ -46,6 +49,9 @@ export class ElectronNativeApi {
     private registerEventListeners() {
         ipcMain.on('startDownloadTask', (event, message: DownloadTaskStartType) => {
             this.addTask(message.videoUrl, message.callbackId)
+        });
+        ipcMain.on('abortDownload', (event, message: VoidCallbackPayload) => {
+            this.downloadTasks[message.callbackId]?.abort();
         });
         ipcMain.on('getSetting', (event, message: GetSettingPayload) => {
             storage.get(message.settingKey, (error, data) => {
@@ -70,6 +76,7 @@ export class ElectronNativeApi {
     public addTask(videoUrl: string, callbackId: string) {
         //'https://www.youtube.com/watch?v=5TZ5twGgu9Y'
         const downloadHandler = new DownloadTaskHandler(videoUrl);
+        this.downloadTasks[callbackId] = downloadHandler;
         const throttledHandler = throttle<(totalLength: number, resolvedLength: number) => void>((totalLength: number, resolvedLength: number) => {
             console.log('Recieved', resolvedLength, 'bytes of', totalLength, 'bytes');
             const downloadTaskUpdate: DownloadTaskUpdateType = { callbackId, percentageComplete: resolvedLength / totalLength }

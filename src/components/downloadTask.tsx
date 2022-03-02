@@ -21,15 +21,17 @@ export enum DownloadStatus {
     DownloadingAudio,
     ConvertingAudio,
     Finished,
+    Aborted
 }
 
 type DownloadTaskProps = {
     thumbnailUrl: string;
     percentageCompleted: number; // 0 - 1
     status: DownloadStatus;
+    abortDownload: () => void
 }
 
-export const DownloadTask = ({ thumbnailUrl, percentageCompleted, status }: DownloadTaskProps) => {
+export const DownloadTask = ({ thumbnailUrl, percentageCompleted, status, abortDownload }: DownloadTaskProps) => {
     // const [downloadPercent, setDownloadPercent] = useState(0);
 
     // useEffect(() => {
@@ -78,7 +80,7 @@ export const DownloadTask = ({ thumbnailUrl, percentageCompleted, status }: Down
                             <ListItemText>Open containingFolder</ListItemText>
                         </MenuItem>
                         
-                        <MenuItem>
+                        <MenuItem onClick={() => abortDownload()}>
                             <ListItemIcon>
                                 <ClearIcon fontSize="small" />
                             </ListItemIcon>

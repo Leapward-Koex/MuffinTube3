@@ -17,6 +17,15 @@ const padding = '20px';
 export const App = () => {
     const [downloadTasks, setDownloadTasks] = useState<{ videoCallbackId: string, thumbnailUrl: string, percentComplete: number, status: DownloadStatus }[]>([]);
 
+
+    const updateVideoStatus = (callbackId: string, videoStatus: DownloadStatus) => {
+        const matchingTask = downloadTasks.find((task) => task.videoCallbackId === callbackId);
+        if (matchingTask) {
+            matchingTask.status = videoStatus;
+            setDownloadTasks([...downloadTasks]);
+        }
+    }
+
     const onVideoSubmitted = async (videoUrl: string) => {
         const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl);
 
@@ -32,11 +41,7 @@ export const App = () => {
             }
         });
         videoDownloadTask.downloaded.then(() => {
-            const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
-            if (matchingTask) {
-                matchingTask.status = DownloadStatus.ConvertingAudio;
-                setDownloadTasks([...downloadTasks]);
-            }
+            updateVideoStatus(videoDownloadTask.callbackId, DownloadStatus.ConvertingAudio);
         })
         videoDownloadTask.onData((percentageComplete) => {
             const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
@@ -46,12 +51,13 @@ export const App = () => {
             }
         });
         videoDownloadTask.taskFinished.then(() => {
-            const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
-            if (matchingTask) {
-                matchingTask.status = DownloadStatus.Finished;
-                setDownloadTasks([...downloadTasks]);
-            }
+            updateVideoStatus(videoDownloadTask.callbackId, DownloadStatus.Finished);
         });
+    }
+
+    const onVideoAborted = (callbackId: string) => {
+        electronJsApi.abortDownload(callbackId);
+        updateVideoStatus(callbackId, DownloadStatus.Aborted);
     }
 
     const theme = createTheme({
@@ -155,7 +161,13 @@ export const App = () => {
                     </div>
                     <Stack spacing={2} className="downloads-container">
                         {downloadTasks.map((downloadTask, index) => {
-                            return <DownloadTask key={index} thumbnailUrl={downloadTask.thumbnailUrl} percentageCompleted={downloadTask.percentComplete} status={downloadTask.status} />
+                            return <DownloadTask
+                            key={index}
+                            thumbnailUrl={downloadTask.thumbnailUrl}
+                            percentageCompleted={downloadTask.percentComplete}
+                            status={downloadTask.status}
+                            abortDownload={() => onVideoAborted(downloadTask.videoCallbackId)}
+                            />
                         })}
                         {/* <DownloadTask thumbnailUrl={''} percentageCompleted={0} status={DownloadStatus.AcquiringMetaData} /> */}
                     </Stack>
