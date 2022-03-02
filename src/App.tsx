@@ -5,7 +5,7 @@ import { VideoInput } from './components/videoInput';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { DownloadTask } from './components/downloadTask';
+import { DownloadStatus, DownloadTask } from './components/downloadTask';
 import { electronJsApi } from './apiService/electronJsApi';
 import { StrictMode } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -15,20 +15,26 @@ import { useState } from 'react';
 
 const padding = '20px';
 export const App = () => {
-    const [downloadTasks, setDownloadTasks] = useState<{ videoCallbackId: string, thumbnailUrl: string, percentComplete: number, status: string }[]>([]);
+    const [downloadTasks, setDownloadTasks] = useState<{ videoCallbackId: string, thumbnailUrl: string, percentComplete: number, status: DownloadStatus }[]>([]);
 
     const onVideoSubmitted = async (videoUrl: string) => {
-        const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl, (percentageComplete) => {
-            console.log(percentageComplete)
-        });
+        const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl);
+
+        downloadTasks.push({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData});
+        setDownloadTasks([...downloadTasks]);
+
         videoDownloadTask.metaData.then((metaData) => {
-            downloadTasks.push({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: metaData.thumbnail, percentComplete: 0, status: 'Downloading...'});
-            setDownloadTasks([...downloadTasks]);
+            const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
+            if (matchingTask) {
+                matchingTask.thumbnailUrl = metaData.thumbnail;
+                matchingTask.status = DownloadStatus.ConvertingAudio;
+                setDownloadTasks([...downloadTasks]);
+            }
         });
         videoDownloadTask.downloaded.then(() => {
             const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
             if (matchingTask) {
-                matchingTask.status = 'Converting...';
+                matchingTask.status = DownloadStatus.ConvertingAudio;
                 setDownloadTasks([...downloadTasks]);
             }
         })
@@ -42,7 +48,7 @@ export const App = () => {
         videoDownloadTask.taskFinished.then(() => {
             const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
             if (matchingTask) {
-                matchingTask.status = 'Finished!';
+                matchingTask.status = DownloadStatus.Finished;
                 setDownloadTasks([...downloadTasks]);
             }
         });
@@ -151,6 +157,7 @@ export const App = () => {
                         {downloadTasks.map((downloadTask, index) => {
                             return <DownloadTask key={index} thumbnailUrl={downloadTask.thumbnailUrl} percentageCompleted={downloadTask.percentComplete} status={downloadTask.status} />
                         })}
+                        {/* <DownloadTask thumbnailUrl={''} percentageCompleted={0} status={DownloadStatus.AcquiringMetaData} /> */}
                     </Stack>
                 </Container >
             </ThemeProvider>

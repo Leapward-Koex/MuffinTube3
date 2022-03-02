@@ -7,6 +7,7 @@ import mv from 'mv'
 import { FfmpegConverter } from './ffmpegConverter';
 import { Id3MetaDataTagger } from './id3MetaDataTagger';
 import storage from 'electron-json-storage'
+import { ensureEmptyFileExists } from './fileUtilities'
 
 export interface VideoMetaData {
     path: string,
@@ -31,7 +32,7 @@ export class DownloadTaskHandler {
     ) {
         const metaData = await this.getMetaData();
         onMetaData(metaData);
-        const opusPath = await this.downloadAudio(
+        const audioPath = await this.downloadAudio(
             metaData.filesize,
             metaData.url,
             metaData.title,
@@ -39,7 +40,7 @@ export class DownloadTaskHandler {
             onData
         );
         onDownloadComplete();
-        const mp3Path = await this.ffmpegConverter.convertToMp3(opusPath, metaData.title);
+        const mp3Path = await this.ffmpegConverter.convertToMp3(audioPath, metaData.title);
         await this.tagger.embedTags(mp3Path, metaData.thumbnail)
         await this.moveToDownloadDirectory(mp3Path, metaData.title)
     }
@@ -77,29 +78,24 @@ export class DownloadTaskHandler {
     }
 
     private downloadAudio(fileSize: number, downloadUrl: string, videoTitle: string, formatExtension: string, onData: (totalLength: number, resolvedLength: number) => void) {
-        return new Promise<string>((resolve, reject) => {
+        return new Promise<string>(async (resolve, reject) => {
             const fileName = `${videoTitle}.${formatExtension}`;
             const destinationPath =  path.join(app.getAppPath(), 'temp', fileName)
 
-            fs.open(destinationPath, "wx", function (openError, fd) {
-                if (openError) throw openError;
-                fs.close(fd, function (closeError) {
-                    if (closeError) throw closeError;
-                    fetch(downloadUrl).then((response) => {
-                        let resolvedLength = 0;
-                        const fileStream = fs.createWriteStream(destinationPath);
-                        response.body!.on('error', reject);
-                        response.body!.on('data', (data: Buffer) => {
-                            resolvedLength += data.length;
-                            onData(fileSize, resolvedLength);
-                        });
-                        fileStream.on('finish', () => {
-                            console.log('done!');
-                            resolve(destinationPath);
-                        });
-                        response.body!.pipe(fileStream);
-                    });
+            await ensureEmptyFileExists(destinationPath);
+            fetch(downloadUrl).then((response) => {
+                let resolvedLength = 0;
+                const fileStream = fs.createWriteStream(destinationPath);
+                response.body!.on('error', reject);
+                response.body!.on('data', (data: Buffer) => {
+                    resolvedLength += data.length;
+                    onData(fileSize, resolvedLength);
                 });
+                fileStream.on('finish', () => {
+                    console.log('done!');
+                    resolve(destinationPath);
+                });
+                response.body!.pipe(fileStream);
             });
         });
     }

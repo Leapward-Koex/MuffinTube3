@@ -58,14 +58,12 @@ class ElectronJsApi {
     }
 
     public startDownloadTask(
-        videoUrl: string,
-        onData: (percentageComplete: number) => void,
+        videoUrl: string
     ) {
         const callbackId = this.generateCallbackId();
         return {
             taskFinished: new Promise<void>((resolve, reject) => {
                 this.callbacks[callbackId] = { resolve, reject };
-                this.onDataCallbacks[callbackId] = onData;
                 window.api?.send('startDownloadTask', { videoUrl, callbackId })
             }),
             metaData: new Promise<YtResponse>((resolve, reject) => {
