@@ -29,7 +29,7 @@ export const App = () => {
     const onVideoSubmitted = async (videoUrl: string, thumbnailUrl: string) => {
         const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl);
 
-        downloadTasks.push({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl, percentComplete: 0, status: DownloadStatus.AcquiringMetaData});
+        downloadTasks.push({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData});
         setDownloadTasks([...downloadTasks]);
 
         videoDownloadTask.metaData.then((metaData) => {

@@ -1,6 +1,7 @@
 import TextField from '@mui/material/TextField';
 import { useEffect, useState } from 'react';
 import { AnimatedClippedImage } from './animatedClippedImage';
+import { VideoTaskMenu } from './videoTaskMenu'
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import Divider from '@mui/material/Divider';
 import Paper from '@mui/material/Paper';
@@ -65,30 +66,7 @@ export const DownloadTask = ({ thumbnailUrl, percentageCompleted, status, abortD
                     </div>
                     <ProgressBar striped animated style={{ marginTop: 0, borderRadius: 0 }} variant={percentageCompleted >= 1 ? 'success' : 'info'} now={percentageCompleted * 100} />
                 </div>
-                <div style={{ width: 50, backgroundColor: 'white' }}>
-                    <MenuList style={{height: '100%'}}>
-                        <MenuItem disabled>
-                            <ListItemIcon>
-                                <DoneIcon fontSize="small" />
-                            </ListItemIcon>
-                            <ListItemText>Clear</ListItemText>
-                        </MenuItem>
-                        <MenuItem>
-                            <ListItemIcon>
-                                <FolderOpen fontSize="small" />
-                            </ListItemIcon>
-                            <ListItemText>Open containingFolder</ListItemText>
-                        </MenuItem>
-                        
-                        <MenuItem onClick={() => abortDownload()}>
-                            <ListItemIcon>
-                                <ClearIcon fontSize="small" />
-                            </ListItemIcon>
-                            <ListItemText>Abort</ListItemText>
-                        </MenuItem>
-                        <Divider />
-                    </MenuList>
-                </div>
+                <VideoTaskMenu onAbortClicked={abortDownload} onClearClicked={() => null} onOpenFolderClicked={() => null} />
             </div>
 
         </div>);
