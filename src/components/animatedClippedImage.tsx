@@ -82,14 +82,14 @@ export const AnimatedClippedImage = ({ imageUrl, percentage, aborted }: Animated
 
                 const deltaTime = time - previousTimeRef.current; // Time elapsed in ms
                 animationElapsedRef.current += deltaTime; // Time elapsed since start of animation
-                const animationElapsedPercent = easeing(animationElapsedRef.current / 2000); // Percent of how far we're though the animation (0-1)
+                const animationElapsedPercent = easeing(animationElapsedRef.current / 1500); // Percent of how far we're though the animation (0-1)
                 const visibleImageHeight = image.clientHeight / imageScaleFactor;
                 const nonVisibleImageHeight = (imageHeight - visibleImageHeight) / 2; // How many pixels are offscreen and not visible (per side)
                 const newImageHeight = (animationElapsedPercent * visibleImageHeight) + nonVisibleImageHeight; // How many pixels through the animation we are.
 
                 const context = canvas.getContext('2d')
                 if (context) {
-                    if (animationElapsedRef.current / 2000 < 1) {
+                    if (animationElapsedRef.current / 1500 < 1) {
                         context.drawImage(image, 0, 0, imageWidth, newImageHeight + 1, 0, 0, imageWidth, newImageHeight + 1);
                         previousImageHeight.current = newImageHeight;
 
