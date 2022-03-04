@@ -2,19 +2,25 @@ import TextField from '@mui/material/TextField';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 type AnimatedClippedImageProps = {
+    aborted?: boolean;
     imageUrl: string;
     percentage: number; // 0 - 100
 }
 
-export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedImageProps) => {
+export const AnimatedClippedImage = ({ imageUrl, percentage, aborted }: AnimatedClippedImageProps) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [imageHeight, setImageHeight] = useState(0);
     const [imageWidth, setImageWidth] = useState(0);
 
+    // For animating downloading
     const animationElapsedRef = useRef(0);
     const previousImageWidth = useRef(0);
     const requestRef = useRef<number>();
     const previousTimeRef = useRef<number>();
+
+    // For animating aborting
+    const abortRef = useRef<number>();
+    const previousImageHeight = useRef(0);
 
     const imageRef = useRef<HTMLImageElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -22,7 +28,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
     const canvas = canvasRef.current;
     const image = imageRef.current;
 
-    const timeToAnimateBlock = 100;
+    const timeToAnimateBlock = 400;
 
     function usePrevious(value: number) {
         const ref = useRef(0);
@@ -35,7 +41,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
     const prevCount = usePrevious(percentage);
 
     const easeing = (x: number) => {
-        return -(Math.cos(Math.PI * x) - 1) / 2; //easeInOutSine
+        return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
     }
 
     const onImageLoaded = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -44,7 +50,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
         setImageLoaded(true);
     }
 
-    const animate = useCallback((time: DOMHighResTimeStamp) => {
+    const animatePercent = useCallback((time: DOMHighResTimeStamp) => {
         if (previousTimeRef.current !== undefined) {
             const deltaTime = time - previousTimeRef.current; // Time elapsed in ms
             animationElapsedRef.current += deltaTime; // Time elapsed since start of animation
@@ -52,7 +58,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
             const animationElapsedPercent = easeing(animationElapsedRef.current / timeToAnimateBlock); // Percent of how far we're though the animation
             const newPercent = (animationElapsedPercent * deltaPercent) + prevCount;
 
-            const imageWidthSlice = Math.min(imageWidth * (newPercent / 100));
+            const imageWidthSlice = imageWidth * (newPercent / 100);
             
             if (canvas && image && imageLoaded) {
                 const context = canvas.getContext('2d')
@@ -64,17 +70,77 @@ export const AnimatedClippedImage = ({ imageUrl, percentage }: AnimatedClippedIm
         }
         if (percentage <= 100) {
             previousTimeRef.current = time;
-            requestRef.current = requestAnimationFrame(animate);
+            requestRef.current = requestAnimationFrame(animatePercent);
         }
 
     }, [canvas, image, imageHeight, imageLoaded, imageWidth, percentage, prevCount]);
 
+    const animateAbort = useCallback((time: DOMHighResTimeStamp) => {
+        if (previousTimeRef.current !== undefined) {
+            if (canvas && image && imageLoaded) {
+                const imageScaleFactor = image.clientWidth / imageWidth;
+
+                const deltaTime = time - previousTimeRef.current; // Time elapsed in ms
+                animationElapsedRef.current += deltaTime; // Time elapsed since start of animation
+                const animationElapsedPercent = easeing(animationElapsedRef.current / 2000); // Percent of how far we're though the animation (0-1)
+                const visibleImageHeight = image.clientHeight / imageScaleFactor;
+                const nonVisibleImageHeight = (imageHeight - visibleImageHeight) / 2; // How many pixels are offscreen and not visible (per side)
+                const newImageHeight = (animationElapsedPercent * visibleImageHeight) + nonVisibleImageHeight; // How many pixels through the animation we are.
+
+                const context = canvas.getContext('2d')
+                if (context) {
+                    if (animationElapsedRef.current / 2000 < 1) {
+                        context.drawImage(image, 0, 0, imageWidth, newImageHeight + 1, 0, 0, imageWidth, newImageHeight + 1);
+                        previousImageHeight.current = newImageHeight;
+
+                    }
+                    else {
+                        context.drawImage(image, 0, 0, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
+                        previousImageHeight.current = imageHeight;
+                    }
+                }
+            }
+        }
+        if (previousImageHeight.current + 1 <= imageHeight) {
+            previousTimeRef.current = time;
+            abortRef.current = requestAnimationFrame(animateAbort);
+        }
+
+    }, [canvas, image, imageHeight, imageLoaded, imageWidth]);
+
     useEffect(() => {
-        requestRef.current = requestAnimationFrame(animate);
-        previousTimeRef.current = undefined;
-        animationElapsedRef.current = 0;
+        if (!aborted) {
+            requestRef.current = requestAnimationFrame(animatePercent);
+            previousTimeRef.current = undefined;
+            animationElapsedRef.current = 0;
+        }
+        else {
+            cancelAnimationFrame(requestRef.current!)
+        }
         return () => cancelAnimationFrame(requestRef.current!);
-    }, [animate]);
+
+    }, [aborted, animatePercent]);
+
+    useEffect(() => {
+        if (aborted) {
+            console.log('aborted')
+            if (requestRef.current) {
+                cancelAnimationFrame(requestRef.current)
+            }
+            if (canvas) {
+                const context = canvas.getContext('2d')
+                if (context) {
+                    context.filter = 'grayscale(1)';
+                }
+            }
+            
+            previousTimeRef.current = undefined;
+            animationElapsedRef.current = 0;
+            abortRef.current = requestAnimationFrame(animateAbort);
+        }
+
+        return () => cancelAnimationFrame(abortRef.current!);
+    }, [aborted, animateAbort]);
 
     return (
         <div style={{ position: 'relative', height: '300px' }}>

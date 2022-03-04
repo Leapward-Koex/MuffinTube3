@@ -78,7 +78,7 @@ export const App = () => {
                     <div className='settingContainer' style={{position: 'absolute', top: 10, left: 10}}>
                         <Settings />
                     </div>
-                    <div className='title' style={{ padding: '20px' }}>
+                    {/* <div className='title' style={{ padding: '20px' }}>
                         <div className="centered">
                             <div className="lazer84">MuffinTube-3</div>
                         </div>
@@ -155,7 +155,7 @@ export const App = () => {
                                 </filter>
                             </defs>
                         </svg>
-                    </div>
+                    </div> */}
                     <div className="video-input-container" style={{ padding }}>
                         <VideoInput onSubmit={(videoUrl, thumbnailUrl) => onVideoSubmitted(videoUrl, thumbnailUrl)}></VideoInput>
                     </div>
@@ -169,7 +169,7 @@ export const App = () => {
                             abortDownload={() => onVideoAborted(downloadTask.videoCallbackId)}
                             />
                         })}
-                        {/* <DownloadTask thumbnailUrl={''} percentageCompleted={0} status={DownloadStatus.AcquiringMetaData} /> */}
+                        <DownloadTask thumbnailUrl={''} percentageCompleted={0} status={DownloadStatus.AcquiringMetaData} abortDownload={() => null} />
                     </Stack>
                 </Container >
             </ThemeProvider>
