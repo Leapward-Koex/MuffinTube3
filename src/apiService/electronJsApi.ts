@@ -1,17 +1,18 @@
 import { YtResponse } from 'youtube-dl-exec';
-import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, GetSettingValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload } from '../../electron/electronNativeApi'
+import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, ValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload } from '../../electron/electronNativeApi'
 
 interface JsExposedApi {
     send(channel: 'startDownloadTask', params: DownloadTaskStartType): void;
     send(channel: 'abortDownload', params: VoidCallbackPayload): void;
     send(channel: 'getSetting', params: GetSettingPayload): void;
     send(channel: 'setSetting', params: SetSettingPayload): void;
+    send(channel: 'showFileInExplorer', params: ValuePayload): void;
     receive(channel: 'downloadTaskMetaData', callback: (data: DownloadTaskMetaDataPayload) => void): void;
     receive(channel: 'downloadTaskProgress', callback: (data: DownloadTaskUpdateType) => void): void;
     receive(channel: 'downloadTaskDownloaded', callback: (data: VoidCallbackPayload) => void): void;
-    receive(channel: 'downloadTaskFinished', callback: (data: VoidCallbackPayload) => void): void;
+    receive(channel: 'downloadTaskFinished', callback: (data: ValuePayload) => void): void;
     receive(channel: 'voidCallback', callback: (data: VoidCallbackPayload) => void): void;
-    receive(channel: 'getSetting', callback: (data: GetSettingValuePayload) => void): void;
+    receive(channel: 'getSetting', callback: (data: ValuePayload) => void): void;
 }
 
 declare global {
@@ -42,7 +43,7 @@ class ElectronJsApi {
         });
         window.api?.receive('downloadTaskFinished', (message) => {
             console.log(message);
-            this.callbacks[message.callbackId].resolve();
+            this.callbacks[message.callbackId].resolve(message.value);
             delete this.callbacks[message.callbackId];
         });
 
@@ -63,7 +64,7 @@ class ElectronJsApi {
     ) {
         const callbackId = this.generateCallbackId();
         return {
-            taskFinished: new Promise<void>((resolve, reject) => {
+            taskFinished: new Promise<string>((resolve, reject) => {
                 this.callbacks[callbackId] = { resolve, reject };
                 window.api?.send('startDownloadTask', { videoUrl, callbackId })
             }),
@@ -79,6 +80,10 @@ class ElectronJsApi {
             callbackId
         };
     }
+
+    public openFileInExplorer(mp3Path: string) {
+        window.api?.send('showFileInExplorer', { callbackId: this.generateCallbackId(), value: mp3Path });
+    };
 
     public abortDownload(callbackId: string) {
         window.api?.send('abortDownload', { callbackId })

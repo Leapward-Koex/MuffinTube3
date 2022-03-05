@@ -15,13 +15,16 @@ import { useState } from 'react';
 
 const padding = '20px';
 export const App = () => {
-    const [downloadTasks, setDownloadTasks] = useState<{ videoCallbackId: string, thumbnailUrl: string, percentComplete: number, status: DownloadStatus }[]>([]);
+    const [downloadTasks, setDownloadTasks] = useState<{ videoCallbackId: string, thumbnailUrl: string, percentComplete: number, status: DownloadStatus, mp3Path: string }[]>([]);
 
 
-    const updateVideoStatus = (callbackId: string, videoStatus: DownloadStatus) => {
+    const updateVideoStatus = (callbackId: string, update: { videoStatus: DownloadStatus, destinationPath?: string }) => {
         const matchingTask = downloadTasks.find((task) => task.videoCallbackId === callbackId);
         if (matchingTask) {
-            matchingTask.status = videoStatus;
+            matchingTask.status = update.videoStatus;
+            if (update.destinationPath) {
+                matchingTask.mp3Path = update.destinationPath;
+            }
             setDownloadTasks([...downloadTasks]);
         }
     }
@@ -29,19 +32,19 @@ export const App = () => {
     const onVideoSubmitted = async (videoUrl: string, thumbnailUrl: string) => {
         const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl);
 
-        downloadTasks.push({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData});
+        downloadTasks.push({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData, mp3Path: ''});
         setDownloadTasks([...downloadTasks]);
 
         videoDownloadTask.metaData.then((metaData) => {
             const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
             if (matchingTask) {
                 matchingTask.thumbnailUrl = metaData.thumbnail;
-                matchingTask.status = DownloadStatus.ConvertingAudio;
+                matchingTask.status = DownloadStatus.DownloadingAudio;
                 setDownloadTasks([...downloadTasks]);
             }
         });
         videoDownloadTask.downloaded.then(() => {
-            updateVideoStatus(videoDownloadTask.callbackId, DownloadStatus.ConvertingAudio);
+            updateVideoStatus(videoDownloadTask.callbackId, { videoStatus: DownloadStatus.ConvertingAudio });
         })
         videoDownloadTask.onData((percentageComplete) => {
             const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
@@ -50,14 +53,14 @@ export const App = () => {
                 setDownloadTasks([...downloadTasks]);
             }
         });
-        videoDownloadTask.taskFinished.then(() => {
-            updateVideoStatus(videoDownloadTask.callbackId, DownloadStatus.Finished);
+        videoDownloadTask.taskFinished.then((destinationPath) => {
+            updateVideoStatus(videoDownloadTask.callbackId, { videoStatus: DownloadStatus.Finished, destinationPath });
         });
     }
 
     const onVideoAborted = (callbackId: string) => {
         electronJsApi.abortDownload(callbackId);
-        updateVideoStatus(callbackId, DownloadStatus.Aborted);
+        updateVideoStatus(callbackId, { videoStatus: DownloadStatus.Aborted });
     }
 
     const theme = createTheme({
@@ -167,9 +170,10 @@ export const App = () => {
                             percentageCompleted={downloadTask.percentComplete}
                             status={downloadTask.status}
                             abortDownload={() => onVideoAborted(downloadTask.videoCallbackId)}
+                            openFolder={() => electronJsApi.openFileInExplorer(downloadTask.mp3Path)}
                             />
                         })}
-                        <DownloadTask thumbnailUrl={''} percentageCompleted={0} status={DownloadStatus.AcquiringMetaData} abortDownload={() => null} />
+                        {/* <DownloadTask thumbnailUrl={''} percentageCompleted={0} status={DownloadStatus.DownloadingAudio} abortDownload={() => null} openFolder={() => null} /> */}
                     </Stack>
                 </Container >
             </ThemeProvider>

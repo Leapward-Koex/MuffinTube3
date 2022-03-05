@@ -2,7 +2,7 @@ import { create as createYtdl, YtResponse} from 'youtube-dl-exec'
 import path from 'path'
 import { app } from 'electron'
 import fs from 'fs'
-import fetch from 'node-fetch'
+import fetch, { AbortError } from 'node-fetch'
 import mv from 'mv'
 import { FfmpegConverter } from './ffmpegConverter';
 import { Id3MetaDataTagger } from './id3MetaDataTagger';
@@ -17,9 +17,10 @@ export interface VideoMetaData {
 
 export class DownloadTaskHandler {
     private ytdlPath = path.join(app.getAppPath(), 'electron', 'ytdl', 'youtube-dl.exe');
-    private abortController = new AbortController()
-    private mp3Path: string | undefined
-    private audioPath: string | undefined
+    private abortController = new AbortController();
+    private mp3Path: string | undefined;
+    private audioPath: string | undefined;
+    private aborted = false;
     constructor (
         private videoUrl: string,
         private ffmpegConverter = new FfmpegConverter(),
@@ -35,6 +36,7 @@ export class DownloadTaskHandler {
     ) {
         const metaData = await this.getMetaData();
         onMetaData(metaData);
+        metaData.title = this.escapeSpecialCharacters(metaData.title)
         this.audioPath = await this.downloadAudio(
             metaData.filesize,
             metaData.url,
@@ -45,12 +47,14 @@ export class DownloadTaskHandler {
         onDownloadComplete();
         this.mp3Path = await this.ffmpegConverter.convertToMp3(this.audioPath, metaData.title);
         await this.tagger.embedTags(this.mp3Path, metaData.thumbnail);
-        await this.moveToDownloadDirectory(this.mp3Path, metaData.title);
+        const desinationFilePath = await this.moveToDownloadDirectory(this.mp3Path, metaData.title);
         await deleteFile(this.audioPath);
         await deleteFile(this.mp3Path);
+        return desinationFilePath;
     }
 
     public async abort() {
+        this.aborted = true;
         this.abortController.abort();
         this.ffmpegConverter.abortJob();
         if (this.audioPath) {
@@ -61,8 +65,12 @@ export class DownloadTaskHandler {
         }
     }
 
+    private escapeSpecialCharacters(title: string) {
+        return title.replaceAll(/[<>:"\/\\|?*]+/g, '')
+    }
+
     private moveToDownloadDirectory(mp3Path: string, audioTitle: string) {
-        return new Promise<void>((resolve) => {
+        return new Promise<string>((resolve) => {
             storage.get('downloadPath', (storageError, data) => {
                 if (storageError) {
                     throw new Error(storageError)
@@ -75,7 +83,7 @@ export class DownloadTaskHandler {
                     if (error) {
                         throw new Error(error);
                     }
-                    resolve();
+                    resolve(destinationPath);
                 })
             });
         }) 
@@ -99,20 +107,31 @@ export class DownloadTaskHandler {
             const destinationPath =  path.join(app.getAppPath(), 'temp', fileName)
 
             await ensureEmptyFileExists(destinationPath);
-            fetch(downloadUrl, { signal: this.abortController.signal }).then((response) => {
-                let resolvedLength = 0;
-                const fileStream = fs.createWriteStream(destinationPath);
-                response.body!.on('error', reject);
-                response.body!.on('data', (data: Buffer) => {
-                    resolvedLength += data.length;
-                    onData(fileSize, resolvedLength);
-                });
-                fileStream.on('finish', () => {
-                    console.log('done!');
-                    resolve(destinationPath);
-                });
-                response.body!.pipe(fileStream);
+            const fileStream = fs.createWriteStream(destinationPath);
+            const handleError = (error: any) => {
+                if (error instanceof AbortError) {
+                    fileStream.close(async () => {
+                        await deleteFile(destinationPath);
+                        reject();
+                    });
+                }
+            }
+            const response = await fetch(downloadUrl, { signal: this.abortController.signal });
+            let resolvedLength = 0;
+            response.body!.on('error', (error) => handleError(error));
+            response.body!.on('data', (data: Buffer) => {
+                resolvedLength += data.length;
+                onData(fileSize, resolvedLength);
             });
+            fileStream.on('finish', () => {
+                console.log('done!');
+                fileStream.close(() => {
+                    if (!this.aborted) {
+                        resolve(destinationPath);
+                    }
+                });
+            });
+            response.body!.pipe(fileStream);
         });
     }
 }

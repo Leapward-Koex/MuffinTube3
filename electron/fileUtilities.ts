@@ -1,4 +1,17 @@
-import fs from 'fs'
+import fs, { constants as FsConstants } from 'fs'
+
+export const doesFileExist = (filePath: string) => {
+    return new Promise<boolean>((resolve) => {
+        fs.access(filePath, FsConstants.F_OK, (err) => {
+            if (err) {
+                resolve(false);
+            }
+            else {
+                resolve(true);
+            }
+        });
+    });
+}
 
 export const deleteFile = (filePath: string) => {
     return new Promise<void>((resolve) => {
@@ -11,7 +24,10 @@ export const deleteFile = (filePath: string) => {
 
 export const ensureEmptyFileExists = (filePath: string) => {
     return new Promise<void>(async (resolve) => {
-        await deleteFile(filePath)
+        const fileExists = await doesFileExist(filePath);
+        if (fileExists) {
+            await deleteFile(filePath)
+        }
         fs.open(filePath, "wx",  (openError, fd) => {
             if (openError) throw openError;
             fs.close(fd, (closeError) => {

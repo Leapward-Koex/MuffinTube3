@@ -1,8 +1,9 @@
-import { BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow, ipcMain, shell } from "electron";
 import { DownloadTaskHandler } from "./downloadTaskHandler";
 import throttle from 'lodash.throttle';
 import storage from 'electron-json-storage'
 import { YtResponse } from "youtube-dl-exec";
+import { doesFileExist } from "./fileUtilities";
 
 export interface DownloadTaskStartType {
     videoUrl: string;
@@ -20,12 +21,12 @@ export interface GetSettingPayload {
     settingKey: string;
 }
 
-export interface GetSettingValuePayload {
+export interface ValuePayload {
     callbackId: string;
     value: any;
 }
 
-export type SetSettingPayload = GetSettingPayload & GetSettingValuePayload;
+export type SetSettingPayload = GetSettingPayload & ValuePayload;
 
 export interface VoidCallbackPayload {
     callbackId: string
@@ -53,12 +54,18 @@ export class ElectronNativeApi {
         ipcMain.on('abortDownload', (event, message: VoidCallbackPayload) => {
             this.downloadTasks[message.callbackId]?.abort();
         });
+        ipcMain.on('showFileInExplorer', async (event, message: ValuePayload) => {
+            const fileExists = await doesFileExist(message.value);
+            if (fileExists) {
+                shell.showItemInFolder(message.value);
+            }
+        });
         ipcMain.on('getSetting', (event, message: GetSettingPayload) => {
             storage.get(message.settingKey, (error, data) => {
                 if (error) {
                     throw new Error(error)
                 }
-                const getSettingValuePayload: GetSettingValuePayload = { ...message, value: (data as any).value };
+                const getSettingValuePayload: ValuePayload = { ...message, value: (data as any).value };
                 this.window.webContents.send('getSetting', getSettingValuePayload)
             });
         });
@@ -89,8 +96,8 @@ export class ElectronNativeApi {
         throttledHandler,
         () => {
             this.window.webContents.send('downloadTaskDownloaded', { callbackId })
-        }).then(() => {
-            const downloadTaskFinishedMessage: VoidCallbackPayload = { callbackId };
+        }).then((downloadMp3Path) => {
+            const downloadTaskFinishedMessage: ValuePayload = { callbackId, value: downloadMp3Path };
             this.window.webContents.send('downloadTaskFinished', downloadTaskFinishedMessage)
         });
     }
