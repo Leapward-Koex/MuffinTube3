@@ -28,15 +28,16 @@ class MuffinTube {
                 app.quit();
             }
         });
-        
+        const ytdlManager = new YtdlManager();
+        const updateYtdl = ytdlManager.checkForUpdate();
         app.on('activate', () => {
             if (!this.mainWindow) {
-                this.createWindow();
+                this.createWindow(updateYtdl);
             }
         });
     }
 
-    private createWindow() {
+    private createWindow(updateYtdl?: Promise<void>) {
         this.mainWindow = new BrowserWindow({ 
             width: 600, height: 600, show: false,
             webPreferences: {
@@ -58,7 +59,10 @@ class MuffinTube {
             this.electronApi = new ElectronNativeApi(this.mainWindow);
         })
     
-        this.mainWindow.once('ready-to-show', () => {
+        this.mainWindow.once('ready-to-show', async () => {
+            if (updateYtdl) {
+                await updateYtdl;
+            }
             this.mainWindow.show();
         });
     

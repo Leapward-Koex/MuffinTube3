@@ -16,7 +16,7 @@ export interface VideoMetaData {
 }
 
 export class DownloadTaskHandler {
-    private ytdlPath = path.join(app.getAppPath(), 'electron', 'ytdl', 'youtube-dl.exe');
+    private ytdlPath = path.join(app.getAppPath(), 'electron', 'ytdl', 'yt-dlp.exe');
     private abortController = new AbortController();
     private mp3Path: string | undefined;
     private audioPath: string | undefined;
