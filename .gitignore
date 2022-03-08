@@ -25,3 +25,4 @@ electron/electron-bundle.js
 electron/electron-bundle.js.map
 electron/ytdl/youtube-dl.exe
 temp
+electron/ytdl/yt-dlp.exe

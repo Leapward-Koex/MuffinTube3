@@ -91,17 +91,28 @@ class ElectronJsApi {
 
     public getSetting(settingKey: string) {
         return new Promise<string>((resolve, reject) => {
-            const callbackId = this.generateCallbackId();
-            this.callbacks[callbackId] = { resolve, reject };
-            window.api?.send('getSetting', { callbackId, settingKey })
+            if (window.api) {
+                const callbackId = this.generateCallbackId();
+                this.callbacks[callbackId] = { resolve, reject };
+                window.api.send('getSetting', { callbackId, settingKey })
+            }
+            else {
+                resolve(localStorage.getItem(settingKey) || '');
+            }
         });
     }
 
     public setSetting(settingKey: string, value: any) {
         return new Promise<void>((resolve, reject) => {
-            const callbackId = this.generateCallbackId();
-            this.callbacks[callbackId] = { resolve, reject };
-            window.api?.send('setSetting', { callbackId, settingKey, value })
+            if (window.api) {
+                const callbackId = this.generateCallbackId();
+                this.callbacks[callbackId] = { resolve, reject };
+                window.api.send('setSetting', { callbackId, settingKey, value })
+            }
+            else {
+                localStorage.setItem(settingKey, value);
+                resolve();
+            }
         });
     }
 
