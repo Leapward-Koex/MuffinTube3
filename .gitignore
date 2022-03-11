@@ -11,6 +11,8 @@
 # production
 /build
 
+/dist
+
 # misc
 .DS_Store
 .env.local
@@ -23,6 +25,7 @@ yarn-debug.log*
 yarn-error.log*
 electron/electron-bundle.js
 electron/electron-bundle.js.map
+electron/electron-bundle.js.LEGAL.txt
 electron/ytdl/youtube-dl.exe
 temp
 electron/ytdl/yt-dlp.exe

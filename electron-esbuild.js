@@ -5,5 +5,7 @@ require('esbuild').build({
     tsconfig: 'electron-tsconfig.json',
     platform: 'node',
     external: ['electron'],
-    sourcemap: 'both'
+    sourcemap: 'external',
+    minify: true,
+    legalComments: 'external'
   }).catch(() => process.exit(1))

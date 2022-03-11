@@ -22,6 +22,15 @@ export const deleteFile = (filePath: string) => {
     });
 }
 
+export const ensureDirectoryExists = (path: string) => {
+    return new Promise<void>(async (resolve) => {
+        fs.mkdir(path, { recursive: true }, (err) => {
+            if (err) throw err;
+            resolve();
+        });
+    });
+}
+
 export const ensureEmptyFileExists = (filePath: string) => {
     return new Promise<void>(async (resolve) => {
         const fileExists = await doesFileExist(filePath);

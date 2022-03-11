@@ -7,7 +7,7 @@ import mv from 'mv'
 import { FfmpegConverter } from './ffmpegConverter';
 import { Id3MetaDataTagger } from './id3MetaDataTagger';
 import storage from 'electron-json-storage'
-import { deleteFile, ensureEmptyFileExists } from './fileUtilities'
+import { deleteFile, ensureDirectoryExists, ensureEmptyFileExists } from './fileUtilities'
 
 export interface VideoMetaData {
     path: string,
@@ -16,7 +16,7 @@ export interface VideoMetaData {
 }
 
 export class DownloadTaskHandler {
-    private ytdlPath = path.join(app.getAppPath(), 'electron', 'ytdl', 'yt-dlp.exe');
+    private ytdlPath = path.join(app.getPath('userData'), 'binaries', 'ytdl', 'yt-dlp.exe');
     private abortController = new AbortController();
     private mp3Path: string | undefined;
     private audioPath: string | undefined;
@@ -104,7 +104,8 @@ export class DownloadTaskHandler {
     private downloadAudio(fileSize: number, downloadUrl: string, videoTitle: string, formatExtension: string, onData: (totalLength: number, resolvedLength: number) => void) {
         return new Promise<string>(async (resolve, reject) => {
             const fileName = `${videoTitle}.${formatExtension}`;
-            const destinationPath =  path.join(app.getAppPath(), 'temp', fileName)
+            await ensureDirectoryExists(path.join(app.getPath('userData'), 'temp'));
+            const destinationPath =  path.join(app.getPath('userData'), 'temp', fileName)
 
             await ensureEmptyFileExists(destinationPath);
             const fileStream = fs.createWriteStream(destinationPath);

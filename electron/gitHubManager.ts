@@ -3,7 +3,8 @@ import fetch from 'node-fetch';
 import fs, { constants as fsConstants } from 'fs';
 import { app } from 'electron'
 import path from 'path';
-import storage from 'electron-json-storage'
+import { ensureDirectoryExists } from './fileUtilities';
+import log from 'electron-log'
 
 export interface GitHubReleaseAsset {
     browser_download_url: string,
@@ -22,12 +23,20 @@ export class GitHubManager {
 
     public async downloadAssetFromRelease(release: GitHubRelease, assetName: 'youtube-dl.exe' | 'yt-dlp.exe') {
         const latestWindowsBinary = release.assets.find((asset) => asset.name === assetName);
-        const destinationPath = path.join(app.getAppPath(), 'electron', 'ytdl', assetName)
+        await ensureDirectoryExists(path.join(app.getPath('userData'), 'binaries', 'ytdl'));
+        const destinationPath = path.join(app.getPath('userData'), 'binaries', 'ytdl', assetName);
+        log.info(`Downloading ${assetName} to ${destinationPath}`);
         return new Promise<void>((resolve, reject) => {
             fetch(latestWindowsBinary.browser_download_url).then((response) => {
                 const fileStream = fs.createWriteStream(destinationPath);
-                response.body.on('error', reject);
-                fileStream.on('finish', resolve);
+                response.body.on('error', (error) => {
+                    log.error(`Downloading ${assetName} failed: ${JSON.stringify(error)}`);
+                    reject();
+                });
+                fileStream.on('finish', () => {
+                    log.error(`Downloading ${assetName} succeeded`);
+                    resolve();
+                });
                 response.body.pipe(fileStream);
             });
         })

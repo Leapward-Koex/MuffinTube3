@@ -10,7 +10,7 @@ export class FfmpegConverter {
     public convertToMp3(audioPath: string, title: string) {
         return new Promise<string>((resolve) => {
             const outputFileName = `${title}.mp3`;
-            const destinationPath = path.join(app.getAppPath(), 'temp', outputFileName);
+            const destinationPath = path.join(app.getPath('userData'), 'temp', outputFileName);
             this.convertJob = execFile( path.join(app.getAppPath(), 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'), [
                 '-i',
                 audioPath,
