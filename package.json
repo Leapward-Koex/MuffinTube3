@@ -59,11 +59,11 @@
   },
   "scripts": {
     "start-react": "set BROWSER=none && react-app-rewired start",
-    "start-electron": "concurrently --kill-others \"npm run bundle-electron && set ELECTRON_START_URL=http://localhost:3000 && electron --inspect-brk=5858 .\"",
-    "build": "react-app-rewired build",
-    "bundle-electron": "node ./electron-esbuild.js",
-    "build-electron-win": "npm run bundle-electron && mkdir build\\src && Xcopy /E /I /Y electron build\\electron",
-    "package-win": "CI=false npm run build && npm run build-electron-win && electron-builder build -c.extraMetadata.main=build/electron/electron-bundle.js --publish never"
+    "start-electron": "concurrently --kill-others \"npm run build-electron && set ELECTRON_START_URL=http://localhost:3000 && electron --inspect-brk=5858 .\"",
+    "build-renderer": "react-app-rewired build",
+    "build-electron": "node ./electron-esbuild.js",
+    "build-electron-win": "npm run build-electron && mkdir build\\src && Xcopy /E /I /Y electron build\\electron",
+    "package-win": "CI=false npm run build-renderer && npm run build-electron-win && electron-builder build -c.extraMetadata.main=build/electron/electron-bundle.js --publish never"
   },
   "eslintConfig": {
     "extends": [
