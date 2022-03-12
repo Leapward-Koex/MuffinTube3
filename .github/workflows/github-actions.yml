@@ -26,8 +26,8 @@ jobs:
     - name: Copy electron bundle
       shell: pwsh
       run: |
-        Copy-Item "./electron/electron-bundle.js" -Destination "build"
-        Copy-Item "./electron/preload.js" -Destination "build"
+        Copy-Item "./electron/electron-bundle.js" -Destination "build/electron"
+        Copy-Item "./electron/preload.js" -Destination "build/electron"
         
     - name: Package electron
       run: |
