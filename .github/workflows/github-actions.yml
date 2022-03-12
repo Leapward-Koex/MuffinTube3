@@ -1,7 +1,7 @@
 name: Package App
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  Package-Electron-App:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -10,25 +10,25 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 16.x
+        
     - name: Npm CI
-      shell: pwsh
       run: |
         npm ci
+        
     - name: Build renderer
-      shell: pwsh
       run: |
         npm run build-renderer
+        
     - name: Build electron
-      shell: pwsh
       run: |
         npm run build-electron
+        
     - name: Copy electron bundle
-      shell: pwsh
     - run: |
         Copy-Item "/electron/electron.bundle.js" -Destination "build"
         Copy-Item "/electron/preload.js" -Destination "build"
+        
     - name: Package electron
-      shell: pwsh
     - run: |
         npx electron-builder build -c.extraMetadata.main=build/electron/electron-bundle.js --publish never"
         
