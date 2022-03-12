@@ -35,6 +35,8 @@ jobs:
       # uses: samuelmeuli/action-electron-builder@92327c67bc45ff7c38bf55d8aa8c4d75b7ea38e7
       uses: samuelmeuli/action-electron-builder@v1.6.0
       with:
+        # GitHub authentication token
+        github_token: ''
         # Whether the app should be released after a successful build
         release: false
         # Other arguments to pass to the `electron-builder` command, e.g. configuration overrides
