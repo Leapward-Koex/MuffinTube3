@@ -15,22 +15,22 @@ jobs:
       run: |
         npm ci
         
-#     - name: Build renderer
-#       run: |
-#         npm run build-renderer
+    - name: Build renderer
+      run: |
+        npm run build-renderer
         
-#     - name: Build electron
-#       run: |
-#         npm run build-electron
+    - name: Build electron
+      run: |
+        npm run build-electron
         
-#     - name: Copy electron bundle
-#     - run: |
-#         Copy-Item "/electron/electron.bundle.js" -Destination "build"
-#         Copy-Item "/electron/preload.js" -Destination "build"
+    - name: Copy electron bundle
+    - run: |
+        Copy-Item "/electron/electron.bundle.js" -Destination "build"
+        Copy-Item "/electron/preload.js" -Destination "build"
         
-#     - name: Package electron
-#     - run: |
-#         npx electron-builder build -c.extraMetadata.main=build/electron/electron-bundle.js --publish never"
+    - name: Package electron
+    - run: |
+        npx electron-builder build -c.extraMetadata.main=build/electron/electron-bundle.js --publish never"
         
 #     - name: Upload a Build Artifact
 #       uses: actions/upload-artifact@v3.0.0
