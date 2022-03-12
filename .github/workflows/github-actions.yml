@@ -29,10 +29,20 @@ jobs:
         New-Item -Path "./build" -Name "electron" -ItemType "Directory"
         Copy-Item "./electron/electron-bundle.js" -Destination "build/electron/electron-bundle.js"
         Copy-Item "./electron/preload.js" -Destination "build/electron/preload.js"
-        
-    - name: Package electron
-      run: |
-        npx electron-builder build -c.extraMetadata.main=build/electron/electron-bundle.js --publish never
+
+    - name: Electron Builder Action
+      # You may pin to the exact commit or the version.
+      # uses: samuelmeuli/action-electron-builder@92327c67bc45ff7c38bf55d8aa8c4d75b7ea38e7
+      uses: samuelmeuli/action-electron-builder@v1.6.0
+      with:
+        # Whether the app should be released after a successful build
+        release: false
+        # Other arguments to pass to the `electron-builder` command, e.g. configuration overrides
+        args: -c.extraMetadata.main=build/electron/electron-bundle.js
+    
+#     - name: Package electron
+#       run: |
+#         npx electron-builder build -c.extraMetadata.main=build/electron/electron-bundle.js --publish never
         
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.0.0
