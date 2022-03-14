@@ -8,8 +8,6 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { DownloadStatus, DownloadTask } from './components/downloadTask';
 import { electronJsApi } from './apiService/electronJsApi';
 import { StrictMode } from 'react';
-import SettingsIcon from '@mui/icons-material/Settings';
-import Fab from '@mui/material/Fab';
 import { Settings } from './components/settings';
 import { useState } from 'react';
 

@@ -1,4 +1,3 @@
-import TextField from '@mui/material/TextField';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 type AnimatedClippedImageProps = {
@@ -140,11 +139,11 @@ export const AnimatedClippedImage = ({ imageUrl, percentage, aborted }: Animated
         }
 
         return () => cancelAnimationFrame(abortRef.current!);
-    }, [aborted, animateAbort]);
+    }, [aborted, animateAbort, canvas]);
 
     return (
         <div style={{ position: 'relative', height: '300px' }}>
-            <img ref={imageRef} src={imageUrl} onLoad={(event) => onImageLoaded(event)} style={{ filter: 'grayscale(100%) blur(1px) brightness(0.8)', display: imageLoaded ? 'block' : 'none', position: 'absolute', height: '100%', width: '100%', objectFit: 'cover' }}>
+            <img alt='' ref={imageRef} src={imageUrl} onLoad={(event) => onImageLoaded(event)} style={{ filter: 'grayscale(100%) blur(1px) brightness(0.8)', display: imageLoaded ? 'block' : 'none', position: 'absolute', height: '100%', width: '100%', objectFit: 'cover' }}>
             </img>
             <canvas ref={canvasRef} width={imageWidth} height={imageHeight} style={{ display: imageLoaded ? 'block' : 'none', position: 'absolute', height: '100%', width: '100%', objectFit: 'cover'}} />
         </div>);
