@@ -1,7 +1,6 @@
 import { Input } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useState } from 'react';
-import getYouTubeID from 'get-youtube-id';
 
 type VideoInputProps = {
     onSubmit: (videoUrl: string, thumbnailUrl: string) => void
@@ -11,10 +10,6 @@ export const VideoInput = ({ onSubmit }: VideoInputProps) => {
     const [videoUrl, setVideoUrl] = useState('');
 
     const getThumbnailUrl = (youtubeUrl: string) => {
-        const id = getYouTubeID(youtubeUrl, { fuzzy: false });
-        if (id) {
-            return `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
-        }
         return '';
     }
 
