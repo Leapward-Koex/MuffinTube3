@@ -18,6 +18,7 @@ jobs:
     - name: Build renderer
       run: |
         set CI=false
+        set process.env.CI=false
         npm run build-renderer
         
     - name: Build electron
