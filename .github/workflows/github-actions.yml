@@ -58,5 +58,5 @@ jobs:
         # Artifact name
         name: Setup
         # A file, directory or wildcard pattern that describes what to upload
-        path: /dist/MuffinTube 3 Setup 3.0.0.exe
+        path: dist/MuffinTube 3 Setup 3.0.0.exe
         # The desired behavior if no files are found using the provided path.
