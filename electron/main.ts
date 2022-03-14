@@ -1,17 +1,8 @@
 import { app, BrowserWindow } from 'electron';
 import { ElectronNativeApi } from './electronNativeApi';
-import npm from 'npm'
-import ytdl from "ytdl-core";
-import { create as createYdDl, YtFlags } from 'youtube-dl-exec'
-import orderBy from 'lodash.orderby';
-import https from 'https'
-import fs from 'fs';
 import path from 'path'
-import os from 'os';
 import url from 'url'
 import { YtdlManager } from './ytdlManager';
-import { FfmpegConverter } from './ffmpegConverter';
-import { Id3MetaDataTagger } from './id3MetaDataTagger';
 
 // Remove 'user:pass@' if you don't need to authenticate to your proxy.
 
