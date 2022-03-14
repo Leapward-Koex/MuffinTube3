@@ -46,6 +46,10 @@ jobs:
 #       run: |
 #         npx electron-builder build -c.extraMetadata.main=build/electron/electron-bundle.js --publish never
         
+    - name: Directories
+      run: |
+        ls -R
+
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.0.0
       with:
