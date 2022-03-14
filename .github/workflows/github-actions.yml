@@ -17,6 +17,7 @@ jobs:
         
     - name: Build renderer
       run: |
+        set CI=false
         npm run build-renderer
         
     - name: Build electron
