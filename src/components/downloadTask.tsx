@@ -82,7 +82,7 @@ export const DownloadTask = ({ thumbnailUrl, percentageCompleted, status, abortD
                     </div>
                     {/* <ProgressBar striped animated style={{ marginTop: 0, borderRadius: 0 }} variant={percentageCompleted >= 1 ? 'success' : 'info'} now={downloadPercent} /> */}
                 </div>
-                <VideoTaskMenu onAbortClicked={abortDownload} onClearClicked={() => null} onOpenFolderClicked={openFolder} />
+                <VideoTaskMenu onAbortClicked={abortDownload} onClearClicked={() => null} onOpenFolderClicked={openFolder} status={status}/>
             </div>
 
         </div>);

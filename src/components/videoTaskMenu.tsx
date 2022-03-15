@@ -6,37 +6,51 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import FolderOpen from '@mui/icons-material/FolderOpen';
 import ClearIcon from '@mui/icons-material/Clear';
 import DoneIcon from '@mui/icons-material/Done';
+import Tooltip from '@mui/material/Tooltip';
+import { DownloadStatus } from './downloadTask';
 
 type VideoTaskMenuProps = {
     onClearClicked: () => void;
     onOpenFolderClicked: () => void;
     onAbortClicked: () => void;
+    status: DownloadStatus;
 }
 
-export const VideoTaskMenu = ({ onAbortClicked, onOpenFolderClicked, onClearClicked }: VideoTaskMenuProps) => {
-
-    return <div style={{ width: 50, backgroundColor: 'white' }}>
-    <MenuList style={{height: '100%'}}>
-        <MenuItem disabled onClick={() => onClearClicked()}>
-            <ListItemIcon>
-                <DoneIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Clear</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => onOpenFolderClicked()}>
-            <ListItemIcon>
-                <FolderOpen fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Open containing folder</ListItemText>
-        </MenuItem>
-        
-        <MenuItem onClick={() => onAbortClicked()}>
-            <ListItemIcon>
-                <ClearIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Abort</ListItemText>
-        </MenuItem>
-        <Divider />
-    </MenuList>
-</div>
+export const VideoTaskMenu = ({ onAbortClicked, onOpenFolderClicked, onClearClicked, status }: VideoTaskMenuProps) => {
+    return (<div style={{ width: 50, backgroundColor: 'white' }}>
+        <MenuList style={{ height: '100%' }}>
+            {
+                status === DownloadStatus.Finished || status === DownloadStatus.Aborted ?
+                    (
+                        <Tooltip title="Clear item">
+                            <MenuItem onClick={() => onClearClicked()}>
+                                <ListItemIcon>
+                                    <DoneIcon fontSize="small" />
+                                </ListItemIcon>
+                                <ListItemText>Clear</ListItemText>
+                            </MenuItem>
+                        </Tooltip>
+                    )
+                    : (
+                        <Tooltip title="Abort download">
+                            <MenuItem disabled={status === DownloadStatus.AcquiringMetaData} onClick={() => onAbortClicked()}>
+                                <ListItemIcon>
+                                    <ClearIcon fontSize="small" />
+                                </ListItemIcon>
+                                <ListItemText>Abort</ListItemText>
+                            </MenuItem>
+                        </Tooltip>
+                    )
+            }
+            <Tooltip title="Open Containing folder">
+                <MenuItem disabled={status !== DownloadStatus.Finished} onClick={() => onOpenFolderClicked()}>
+                    <ListItemIcon>
+                        <FolderOpen fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Open containing folder</ListItemText>
+                </MenuItem>
+            </Tooltip>
+            <Divider />
+        </MenuList>
+    </div>)
 }
