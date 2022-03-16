@@ -4,6 +4,7 @@ import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import FolderOpen from '@mui/icons-material/FolderOpen';
+import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
 import DoneIcon from '@mui/icons-material/Done';
 import Tooltip from '@mui/material/Tooltip';
@@ -13,14 +14,15 @@ type VideoTaskMenuProps = {
     onClearClicked: () => void;
     onOpenFolderClicked: () => void;
     onAbortClicked: () => void;
+    onEditClicked: () => void;
     status: DownloadStatus;
 }
 
-export const VideoTaskMenu = ({ onAbortClicked, onOpenFolderClicked, onClearClicked, status }: VideoTaskMenuProps) => {
+export const VideoTaskMenu = ({ onAbortClicked, onOpenFolderClicked, onClearClicked, onEditClicked, status }: VideoTaskMenuProps) => {
     return (<div style={{ width: 50, backgroundColor: 'white' }}>
         <MenuList style={{ height: '100%' }}>
             {
-                status === DownloadStatus.Finished || status === DownloadStatus.Aborted ?
+                status === DownloadStatus.Finished || status === DownloadStatus.Aborted || true ?
                     (
                         <Tooltip title="Clear item">
                             <MenuItem onClick={() => onClearClicked()}>
@@ -48,6 +50,14 @@ export const VideoTaskMenu = ({ onAbortClicked, onOpenFolderClicked, onClearClic
                         <FolderOpen fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>Open containing folder</ListItemText>
+                </MenuItem>
+            </Tooltip>
+            <Tooltip title="Edit tags">
+                <MenuItem disabled={status === DownloadStatus.Aborted} onClick={() => onEditClicked()}>
+                    <ListItemIcon>
+                        <EditIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Edit tags</ListItemText>
                 </MenuItem>
             </Tooltip>
             <Divider />

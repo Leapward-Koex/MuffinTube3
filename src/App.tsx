@@ -121,6 +121,7 @@ export const App = () => {
                             ...rest
                         }}>
                                 <DownloadTask
+                                videoCallbackId={item.videoCallbackId}
                                 thumbnailUrl={item.thumbnailUrl}
                                 percentageCompleted={item.percentComplete}
                                 status={item.status}
