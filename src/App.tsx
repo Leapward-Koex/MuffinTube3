@@ -108,7 +108,7 @@ export const App = () => {
                     <div className='settingContainer' style={{position: 'absolute', top: 10, left: 10}}>
                         <Settings />
                     </div>
-                    <Title />
+                    {/* <Title /> */}
                     <div className="video-input-container" style={{ padding }}>
                         <VideoInput onSubmit={(videoUrl, thumbnailUrl) => onVideoSubmitted(videoUrl, thumbnailUrl)}></VideoInput>
                     </div>

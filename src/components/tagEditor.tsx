@@ -17,7 +17,7 @@ export const TagEditor = ({videoCallbackId, initialVideoTitle, onClose}: TagEdit
     }
     return (
     <>
-    <div style={{display: 'flex', flexDirection: 'column', padding: 20, width: '30%', minWidth: 100, height: '100%', margin: 'auto'}}>
+    <div style={{display: 'flex', flexDirection: 'column', padding: 20, paddingLeft: 30, paddingRight: 70, width: '100%', height: '100%', margin: 'auto', backgroundColor: 'whitesmoke'}}>
         <div style={{display: 'flex', flexDirection: 'column', flexGrow: '1'}}>
             <TextField value={songTitle} onChange={(event) => setSongTitle(event.target.value)} label={'Song title'} variant="standard" />
             <TextField value={artistName} onChange={(event) => setArtistName(event.target.value)} style={{marginTop: 10}} label={'Artist name'} variant="standard" /> 

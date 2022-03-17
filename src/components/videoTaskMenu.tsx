@@ -19,7 +19,7 @@ type VideoTaskMenuProps = {
 }
 
 export const VideoTaskMenu = ({ onAbortClicked, onOpenFolderClicked, onClearClicked, onEditClicked, status }: VideoTaskMenuProps) => {
-    return (<div style={{ width: 50, backgroundColor: 'white' }}>
+    return (<div style={{ width: 50, backgroundColor: 'white', zIndex: 2 }}>
         <MenuList style={{ height: '100%' }}>
             {
                 status === DownloadStatus.Finished || status === DownloadStatus.Aborted || true ?

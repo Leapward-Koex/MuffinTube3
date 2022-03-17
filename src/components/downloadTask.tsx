@@ -26,10 +26,9 @@ type DownloadTaskProps = {
 export const DownloadTask = ({ videoCallbackId, thumbnailUrl, percentageCompleted, status, abortDownload, openFolder, clearClicked }: DownloadTaskProps) => {
     const [showEditDialog, setShowEditDialog] = useState(false);
 
-    const { transform, opacity } = useSpring({
-        opacity: showEditDialog ? 1 : 0,
-        transform: `perspective(600px) rotateX(${showEditDialog ? 180 : 0}deg)`,
-        config: { mass: 5, tension: 500, friction: 80 },
+    const { transform } = useSpring({
+        transform: `translate3d(${showEditDialog ? 0 : 100}%,0,0)`,
+        config: { mass: 5, tension: 700, friction: 80 },
     })
 
     const getStatusText = (currentStatus: DownloadStatus, percent: number) => {
@@ -60,28 +59,20 @@ export const DownloadTask = ({ videoCallbackId, thumbnailUrl, percentageComplete
             <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <div style={{ flexGrow: '1', position: 'relative' }}>
                     <LinearProgress variant={status === DownloadStatus.AcquiringMetaData ? 'indeterminate' : 'determinate'} value={status === DownloadStatus.Aborted ? 0 : percentageCompleted * 100} />
-                    <animated.div style={{ 
-                        willChange: 'transform, opacity',
-                        opacity: opacity.to(o => 1 - o),
-                        transform,
-                    }}>
-                        <div className="image-container">
-                            <AnimatedClippedImage imageUrl={thumbnailUrl} percentage={percentageCompleted * 100} aborted={status === DownloadStatus.Aborted}/>
-                        </div>
-                        <div style={{position: 'absolute', bottom: 10, left: 10, fontSize: 20, backgroundColor: 'white', fontWeight: 700, padding: '2px 5px', borderRadius: 5}}>
-                            {getStatusText(status, Math.floor(percentageCompleted * 100))}
-                        </div>
-                    </animated.div>
+                    <div className="image-container">
+                        <AnimatedClippedImage imageUrl={thumbnailUrl} percentage={percentageCompleted * 100} aborted={status === DownloadStatus.Aborted}/>
+                    </div>
+                    <div style={{position: 'absolute', bottom: 10, left: 10, fontSize: 20, backgroundColor: 'white', fontWeight: 700, padding: '2px 5px', borderRadius: 5}}>
+                        {getStatusText(status, Math.floor(percentageCompleted * 100))}
+                    </div>
                     <animated.div style={{
                         willChange: 'transform, opacity',
-                        opacity,
                         transform,
-                        rotateX: '180deg',
                         position: 'absolute',
                         height: '100%',
-                        backgroundColor: 'white',
                         top: 4,
-                        width: '100%'
+                        right: -40,
+                        width: '420px'
                     }}>
                         <TagEditor videoCallbackId={videoCallbackId} initialVideoTitle= 'Hellotest' onClose={() => setShowEditDialog(false)} />
                     </animated.div>
