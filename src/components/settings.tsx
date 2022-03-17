@@ -14,6 +14,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 
 export const Settings = () => {
     const [open, setOpen] = useState(false);
@@ -30,6 +32,14 @@ export const Settings = () => {
         }
         setOpen(true);
     };
+
+    const handleFolderPickerClicked = () => {
+        electronJsApi.openFolderPicker().then((selectedFolder) => {
+            if (selectedFolder) {
+                setDownloadLocation(selectedFolder);
+            }
+        })
+    }
 
     const handleClose = (savePath: boolean) => {
         setOpen(false);
@@ -57,18 +67,25 @@ export const Settings = () => {
                     {"MuffinTube Settings"}
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="name"
-                        label="Download location"
-                        placeholder='C:\Users\<Username>\Music\'
-                        fullWidth
-                        autoComplete='off'
-                        variant="standard"
-                        value={downloadLocation}
-                        onChange={(event) => setDownloadLocation(event.target.value)}
-                    />
+                    <div style={{display: 'flex', flexDirection: 'row'}}>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="name"
+                            label="Download location"
+                            placeholder='C:\Users\<Username>\Music\'
+                            fullWidth
+                            autoComplete='off'
+                            variant="standard"
+                            value={downloadLocation}
+                            onChange={(event) => setDownloadLocation(event.target.value)}
+                        />
+                        <Tooltip title="Open folder select window">
+                            <IconButton style={{margin: 20}} color='primary' onClick={() => handleFolderPickerClicked()}>
+                                <FolderOpenIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </div>
                     <FormControl>
                         <FormLabel id="demo-radio-buttons-group-label">Youtube-dl variant</FormLabel>
                         <RadioGroup

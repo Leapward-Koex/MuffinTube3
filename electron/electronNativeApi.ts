@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, shell } from "electron";
+import { BrowserWindow, ipcMain, shell, dialog } from "electron";
 import { DownloadTaskHandler } from "./downloadTaskHandler";
 import throttle from 'lodash.throttle';
 import storage from 'electron-json-storage'
@@ -73,6 +73,14 @@ export class ElectronNativeApi {
                 }
                 const getSettingValuePayload: ValuePayload = { ...message, value: (data as any).value };
                 this.window.webContents.send('getSetting', getSettingValuePayload)
+            });
+        });
+        ipcMain.on('openFolderPicker', (event, message: VoidCallbackPayload) => {
+            dialog.showOpenDialog(this.window, {
+                properties: ['openDirectory']
+            }).then((value) => {
+                const pathPayload: ValuePayload = { ...message, value: value.filePaths.length === 1 ? value.filePaths[0] : undefined };
+                this.window.webContents.send('openFolderPicker', pathPayload)
             });
         });
         ipcMain.on('setSetting', (event, message: SetSettingPayload) => {

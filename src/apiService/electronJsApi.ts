@@ -8,12 +8,14 @@ interface JsExposedApi {
     send(channel: 'setSetting', params: SetSettingPayload): void;
     send(channel: 'showFileInExplorer', params: ValuePayload): void;
     send(channel: 'setSongTags', params: SetSongTagsPayload): void;
+    send(channel: 'openFolderPicker', params: VoidCallbackPayload): void;
     receive(channel: 'downloadTaskMetaData', callback: (data: DownloadTaskMetaDataPayload) => void): void;
     receive(channel: 'downloadTaskProgress', callback: (data: DownloadTaskUpdateType) => void): void;
     receive(channel: 'downloadTaskDownloaded', callback: (data: VoidCallbackPayload) => void): void;
     receive(channel: 'downloadTaskFinished', callback: (data: ValuePayload) => void): void;
     receive(channel: 'voidCallback', callback: (data: VoidCallbackPayload) => void): void;
     receive(channel: 'getSetting', callback: (data: ValuePayload) => void): void;
+    receive(channel: 'openFolderPicker', callback: (data: ValuePayload) => void): void;
 }
 
 declare global {
@@ -54,6 +56,11 @@ class ElectronJsApi {
             delete this.callbacks[message.callbackId];
         });
         window.api?.receive('getSetting', (message) => {
+            console.log(message);
+            this.callbacks[message.callbackId]?.resolve(message.value);
+            delete this.callbacks[message.callbackId];
+        });
+        window.api?.receive('openFolderPicker', (message) => {
             console.log(message);
             this.callbacks[message.callbackId]?.resolve(message.value);
             delete this.callbacks[message.callbackId];
@@ -118,6 +125,14 @@ class ElectronJsApi {
                 localStorage.setItem(settingKey, value);
                 resolve();
             }
+        });
+    }
+
+    public openFolderPicker() {
+        return new Promise<string>((resolve, reject) => {
+            const callbackId = this.generateCallbackId();
+            this.callbacks[callbackId] = { resolve, reject };
+            window.api?.send('openFolderPicker', { callbackId })
         });
     }
 
