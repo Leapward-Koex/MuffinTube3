@@ -11,14 +11,15 @@ import { StrictMode } from 'react';
 import { Settings } from './components/settings';
 import { useState } from 'react';
 import { useTransition, animated } from "react-spring";
-import { Title } from './components/title';
+// import { Title } from './components/title';
 
 export interface DownloadTaskItem { 
     videoCallbackId: string,
     thumbnailUrl: string,
+    videoTitle: string,
     percentComplete: number
-     status: DownloadStatus,
-     mp3Path: string
+    status: DownloadStatus,
+    mp3Path: string
 }
 
 const padding = '20px';
@@ -39,7 +40,7 @@ export const App = () => {
     const onVideoSubmitted = async (videoUrl: string, thumbnailUrl: string) => {
         const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl);
 
-        downloadTasks.unshift({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData, mp3Path: ''});
+        downloadTasks.unshift({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', videoTitle: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData, mp3Path: ''});
         setDownloadTasks([...downloadTasks]);
 
         videoDownloadTask.metaData.then((metaData) => {
@@ -47,6 +48,7 @@ export const App = () => {
             if (matchingTask) {
                 matchingTask.thumbnailUrl = metaData.thumbnail;
                 matchingTask.status = DownloadStatus.DownloadingAudio;
+                matchingTask.videoTitle = metaData.title;
                 setDownloadTasks([...downloadTasks]);
             }
         });
@@ -123,6 +125,7 @@ export const App = () => {
                                 <DownloadTask
                                 videoCallbackId={item.videoCallbackId}
                                 thumbnailUrl={item.thumbnailUrl}
+                                videoTitle={item.videoTitle}
                                 percentageCompleted={item.percentComplete}
                                 status={item.status}
                                 abortDownload={() => onVideoAborted(item.videoCallbackId)}

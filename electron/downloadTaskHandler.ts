@@ -21,6 +21,12 @@ export class DownloadTaskHandler {
     private mp3Path: string | undefined;
     private audioPath: string | undefined;
     private aborted = false;
+    private songTitle: string | undefined;
+    private artistName: string | undefined;
+    private taskCompleted: boolean | undefined
+    private thumbnailUrl: string | undefined
+    private desinationFilePath: string | undefined
+    
     constructor (
         private videoUrl: string,
         private ffmpegConverter = new FfmpegConverter(),
@@ -36,7 +42,11 @@ export class DownloadTaskHandler {
     ) {
         const metaData = await this.getMetaData();
         onMetaData(metaData);
-        metaData.title = this.escapeSpecialCharacters(metaData.title)
+        metaData.title = this.escapeSpecialCharacters(metaData.title);
+        if (!this.songTitle) {
+            this.songTitle = metaData.title;
+        }
+        this.thumbnailUrl = metaData.thumbnail;
         this.audioPath = await this.downloadAudio(
             metaData.filesize,
             metaData.url,
@@ -46,11 +56,12 @@ export class DownloadTaskHandler {
         );
         onDownloadComplete();
         this.mp3Path = await this.ffmpegConverter.convertToMp3(this.audioPath, metaData.title);
-        await this.tagger.embedTags(this.mp3Path, metaData.thumbnail);
-        const desinationFilePath = await this.moveToDownloadDirectory(this.mp3Path, metaData.title);
+        await this.tagger.embedTags(this.mp3Path, this.songTitle, this.artistName || '', this.thumbnailUrl);
+        this.desinationFilePath = await this.moveToDownloadDirectory(this.mp3Path, metaData.title);
         await deleteFile(this.audioPath);
         await deleteFile(this.mp3Path);
-        return desinationFilePath;
+        this.taskCompleted = true;
+        return this.desinationFilePath;
     }
 
     public async abort() {
@@ -62,6 +73,14 @@ export class DownloadTaskHandler {
         }
         if (this.mp3Path) {
             await deleteFile(this.mp3Path)
+        }
+    }
+
+    public async setTags(songTitle: string, artistName: string) {
+        this.songTitle = songTitle;
+        this.artistName = artistName;
+        if (this.taskCompleted) {
+            await this.tagger.embedTags(this.desinationFilePath!, this.songTitle, this.artistName, this.thumbnailUrl!);
         }
     }
 
@@ -96,6 +115,7 @@ export class DownloadTaskHandler {
             noWarnings: true,
             noCheckCertificate: true,
             format: 'bestaudio',
+            noPlaylist: true,
             youtubeSkipDashManifest: true,
             referer: this.videoUrl
         });

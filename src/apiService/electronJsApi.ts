@@ -1,5 +1,5 @@
 import { YtResponse } from 'youtube-dl-exec';
-import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, ValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload } from '../../electron/electronNativeApi'
+import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, ValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload, SetSongTagsPayload } from '../../electron/electronNativeApi'
 
 interface JsExposedApi {
     send(channel: 'startDownloadTask', params: DownloadTaskStartType): void;
@@ -7,6 +7,7 @@ interface JsExposedApi {
     send(channel: 'getSetting', params: GetSettingPayload): void;
     send(channel: 'setSetting', params: SetSettingPayload): void;
     send(channel: 'showFileInExplorer', params: ValuePayload): void;
+    send(channel: 'setSongTags', params: SetSongTagsPayload): void;
     receive(channel: 'downloadTaskMetaData', callback: (data: DownloadTaskMetaDataPayload) => void): void;
     receive(channel: 'downloadTaskProgress', callback: (data: DownloadTaskUpdateType) => void): void;
     receive(channel: 'downloadTaskDownloaded', callback: (data: VoidCallbackPayload) => void): void;
@@ -87,6 +88,10 @@ class ElectronJsApi {
 
     public abortDownload(callbackId: string) {
         window.api?.send('abortDownload', { callbackId })
+    }
+
+    public setSongTags(callbackId: string, songTitle: string, artistName: string) {
+        window.api?.send('setSongTags', { callbackId, songTitle, artistName });
     }
 
     public getSetting(settingKey: string) {

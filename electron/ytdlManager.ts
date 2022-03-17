@@ -33,7 +33,7 @@ export class YtdlManager {
             log.info(`Going to update ytdl, latest version: ${latestYtdlRelease.tag_name}`);
             downloadTasks.push(this.gitHubManager.downloadAssetFromRelease(latestYtdlRelease, 'youtube-dl.exe'));
         }
-        if (!installedYtdlpVersion.version || latestYtdlpRelease.tag_name !== installedYtdlVersion.version) {
+        if (!installedYtdlpVersion.version || latestYtdlpRelease.tag_name !== installedYtdlpVersion.version) {
             // Forked YTDLP
             log.info(`Going to update ytdlp, latest version: ${latestYtdlpRelease.tag_name}`);
             downloadTasks.push(this.gitHubManager.downloadAssetFromRelease(latestYtdlpRelease, 'yt-dlp.exe'));

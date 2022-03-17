@@ -26,6 +26,12 @@ export interface ValuePayload {
     value: any;
 }
 
+export interface SetSongTagsPayload {
+    callbackId: string;
+    songTitle: string;
+    artistName: string;
+}
+
 export type SetSettingPayload = GetSettingPayload & ValuePayload;
 
 export interface VoidCallbackPayload {
@@ -77,6 +83,9 @@ export class ElectronNativeApi {
                 const setSettingPayload: VoidCallbackPayload = { callbackId: message.callbackId };
                 this.window.webContents.send('voidCallback', setSettingPayload)
             });
+        });
+        ipcMain.on('setSongTags', (event, message: SetSongTagsPayload) => {
+            this.downloadTasks[message.callbackId]?.setTags(message.songTitle, message.artistName)
         });
     }
 

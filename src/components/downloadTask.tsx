@@ -18,12 +18,13 @@ type DownloadTaskProps = {
     thumbnailUrl: string;
     percentageCompleted: number; // 0 - 1
     status: DownloadStatus;
+    videoTitle: string;
     abortDownload: () => void;
     openFolder: () => void;
     clearClicked: () => void;
 }
 
-export const DownloadTask = ({ videoCallbackId, thumbnailUrl, percentageCompleted, status, abortDownload, openFolder, clearClicked }: DownloadTaskProps) => {
+export const DownloadTask = ({ videoCallbackId, thumbnailUrl, percentageCompleted, status, videoTitle, abortDownload, openFolder, clearClicked }: DownloadTaskProps) => {
     const [showEditDialog, setShowEditDialog] = useState(false);
 
     const { transform } = useSpring({
@@ -74,7 +75,7 @@ export const DownloadTask = ({ videoCallbackId, thumbnailUrl, percentageComplete
                         right: -40,
                         width: '420px'
                     }}>
-                        <TagEditor videoCallbackId={videoCallbackId} initialVideoTitle= 'Hellotest' onClose={() => setShowEditDialog(false)} />
+                        <TagEditor videoCallbackId={videoCallbackId} initialVideoTitle={videoTitle} onClose={() => setShowEditDialog(false)} />
                     </animated.div>
                 </div>
                 <VideoTaskMenu onAbortClicked={abortDownload} onClearClicked={clearClicked} onOpenFolderClicked={openFolder} onEditClicked={() => setShowEditDialog(!showEditDialog)} status={status}/>
