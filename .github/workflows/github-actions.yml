@@ -43,14 +43,6 @@ jobs:
         release: false
         # Other arguments to pass to the `electron-builder` command, e.g. configuration overrides
         args: -c.extraMetadata.main=build/electron/electron-bundle.js
-    
-#     - name: Package electron
-#       run: |
-#         npx electron-builder build -c.extraMetadata.main=build/electron/electron-bundle.js --publish never
-        
-    - name: Directories
-      run: |
-        ls -R
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.0.0
