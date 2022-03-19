@@ -8,6 +8,9 @@ import { FfmpegConverter } from './ffmpegConverter';
 import { Id3MetaDataTagger } from './id3MetaDataTagger';
 import storage from 'electron-json-storage'
 import { deleteFile, ensureDirectoryExists, ensureEmptyFileExists } from './fileUtilities'
+import settingManager from './settingManager'
+import { settingsKey } from '../src/sharedEnums'
+import log from 'electron-log'
 
 export interface VideoMetaData {
     path: string,
@@ -16,7 +19,6 @@ export interface VideoMetaData {
 }
 
 export class DownloadTaskHandler {
-    private ytdlPath = path.join(app.getPath('userData'), 'binaries', 'ytdl', 'yt-dlp.exe');
     private abortController = new AbortController();
     private mp3Path: string | undefined;
     private audioPath: string | undefined;
@@ -108,8 +110,12 @@ export class DownloadTaskHandler {
         }) 
     }
 
-    private getMetaData() {
-        const youtubedl = createYtdl(this.ytdlPath);
+    private async getMetaData() {
+        const ytdlVariantToUse = await settingManager.getSettings<'ytdl' | 'ytdlp'>(settingsKey.ytdlVariant);
+        const ytdlVariantBinary = ytdlVariantToUse === 'ytdl' ? 'youtube-dl.exe' : 'yt-dlp.exe';
+        const ytdlPath = path.join(app.getPath('userData'), 'binaries', 'ytdl', ytdlVariantBinary);
+        log.info(`Acquiring meta data with ${ytdlPath}`)
+        const youtubedl = createYtdl(ytdlPath);
         return youtubedl(this.videoUrl, {
             dumpSingleJson: true,
             noWarnings: true,

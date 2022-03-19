@@ -1,5 +1,6 @@
 import { YtResponse } from 'youtube-dl-exec';
 import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, ValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload, SetSongTagsPayload, YtdlDownloadUpdatePayload } from '../../electron/electronNativeApi'
+import { settingsKey } from '../sharedEnums';
 
 interface JsExposedApi {
     send(channel: 'startDownloadTask', params: DownloadTaskStartType): void;
@@ -143,7 +144,7 @@ class ElectronJsApi {
         window.api?.send('setSongTags', { callbackId, songTitle, artistName });
     }
 
-    public getSetting(settingKey: string) {
+    public getSetting(settingKey: settingsKey) {
         return new Promise<string>((resolve, reject) => {
             if (window.api) {
                 const callbackId = this.generateCallbackId();
@@ -156,7 +157,7 @@ class ElectronJsApi {
         });
     }
 
-    public setSetting(settingKey: string, value: any) {
+    public setSetting(settingKey: settingsKey, value: any) {
         return new Promise<void>((resolve, reject) => {
             if (window.api) {
                 const callbackId = this.generateCallbackId();

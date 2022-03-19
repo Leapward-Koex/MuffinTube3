@@ -1,15 +1,15 @@
 import { BrowserWindow, ipcMain, shell, dialog } from "electron";
 import { DownloadTaskHandler } from "./downloadTaskHandler";
 import throttle from 'lodash.throttle';
-import storage from 'electron-json-storage'
 import { YtResponse } from "youtube-dl-exec";
 import { doesFileExist } from "./fileUtilities";
+import settingManager from './settingManager';
+import { settingsKey } from "../src/sharedEnums";
 
 export interface DownloadTaskStartType {
     videoUrl: string;
     callbackId: string;
 }
-
 
 export interface DownloadTaskUpdateType {
     callbackId: string;
@@ -18,7 +18,7 @@ export interface DownloadTaskUpdateType {
 
 export interface GetSettingPayload {
     callbackId: string;
-    settingKey: string;
+    settingKey: settingsKey;
 }
 
 export interface ValuePayload {
@@ -72,14 +72,15 @@ export class ElectronNativeApi {
                 shell.showItemInFolder(message.value);
             }
         });
-        ipcMain.on('getSetting', (event, message: GetSettingPayload) => {
-            storage.get(message.settingKey, (error, data) => {
-                if (error) {
-                    throw new Error(error)
-                }
-                const getSettingValuePayload: ValuePayload = { ...message, value: (data as any).value };
-                this.window.webContents.send('getSetting', getSettingValuePayload)
-            });
+        ipcMain.on('getSetting', async (event, message: GetSettingPayload) => {
+            const value = await settingManager.getSettings(message.settingKey);
+            const getSettingValuePayload: ValuePayload = { ...message, value };
+            this.window.webContents.send('getSetting', getSettingValuePayload)
+        });
+        ipcMain.on('setSetting', async (event, message: SetSettingPayload) => {
+            await settingManager.setSetting(message.settingKey, message.value);
+            const setSettingPayload: VoidCallbackPayload = { callbackId: message.callbackId };
+            this.window.webContents.send('voidCallback', setSettingPayload)
         });
         ipcMain.on('openFolderPicker', (event, message: VoidCallbackPayload) => {
             dialog.showOpenDialog(this.window, {
@@ -87,15 +88,6 @@ export class ElectronNativeApi {
             }).then((value) => {
                 const pathPayload: ValuePayload = { ...message, value: value.filePaths.length === 1 ? value.filePaths[0] : undefined };
                 this.window.webContents.send('openFolderPicker', pathPayload)
-            });
-        });
-        ipcMain.on('setSetting', (event, message: SetSettingPayload) => {
-            storage.set(message.settingKey, { value: message.value }, (error) => {
-                if (error) {
-                    throw new Error(error);
-                }
-                const setSettingPayload: VoidCallbackPayload = { callbackId: message.callbackId };
-                this.window.webContents.send('voidCallback', setSettingPayload)
             });
         });
         ipcMain.on('setSongTags', (event, message: SetSongTagsPayload) => {

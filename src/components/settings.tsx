@@ -16,6 +16,7 @@ import FormLabel from '@mui/material/FormLabel';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import { settingsKey } from '../sharedEnums';
 
 export const Settings = () => {
     const [open, setOpen] = useState(false);
@@ -23,7 +24,7 @@ export const Settings = () => {
     const [ytdlVariant, setYtdlVariant] = useState<'ytdl' | 'ytdlp'>();
 
     const handleClickOpen = async () => {
-        const [savedDownloadLocation, savedYtdlVariant] = await Promise.all([electronJsApi.getSetting('downloadPath'), electronJsApi.getSetting('ytdl-variant')])
+        const [savedDownloadLocation, savedYtdlVariant] = await Promise.all([electronJsApi.getSetting(settingsKey.downloadPath), electronJsApi.getSetting(settingsKey.ytdlVariant)])
         if (savedDownloadLocation) {
             setDownloadLocation(savedDownloadLocation);
         }
@@ -44,10 +45,10 @@ export const Settings = () => {
     const handleClose = (savePath: boolean) => {
         setOpen(false);
         if (savePath) {
-            electronJsApi.setSetting('downloadPath', downloadLocation)
+            electronJsApi.setSetting(settingsKey.downloadPath, downloadLocation)
         }
         if (ytdlVariant) {
-            electronJsApi.setSetting('ytdl-variant', ytdlVariant)
+            electronJsApi.setSetting(settingsKey.ytdlVariant, ytdlVariant)
         }
     };
 
