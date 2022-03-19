@@ -1,5 +1,5 @@
 import { YtResponse } from 'youtube-dl-exec';
-import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, ValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload, SetSongTagsPayload } from '../../electron/electronNativeApi'
+import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, ValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload, SetSongTagsPayload, YtdlDownloadUpdatePayload } from '../../electron/electronNativeApi'
 
 interface JsExposedApi {
     send(channel: 'startDownloadTask', params: DownloadTaskStartType): void;
@@ -16,6 +16,10 @@ interface JsExposedApi {
     receive(channel: 'voidCallback', callback: (data: VoidCallbackPayload) => void): void;
     receive(channel: 'getSetting', callback: (data: ValuePayload) => void): void;
     receive(channel: 'openFolderPicker', callback: (data: ValuePayload) => void): void;
+    receive(channel: 'onYtdlUpdateCheck', callback: (data: ValuePayload) => void): void;
+    receive(channel: 'onYtdlData', callback: (data: YtdlDownloadUpdatePayload) => void): void;
+    receive(channel: 'onYtdlUpdateComplete', callback: (data: ValuePayload) => void): void;
+    receive(channel: 'onYtdlVersionCheckComplete', callback: (data: ValuePayload) => void): void;
 }
 
 declare global {
@@ -27,6 +31,8 @@ declare global {
 class ElectronJsApi {
     private callbacks: {[callbackId: string]: { resolve: Function, reject: Function }} = {};
     private onDataCallbacks: {[callbackId: string]: (percentageComplete: number) => void} = {};
+    private ytdlUpdateCallbacks: {[variant: string]: (resolvedSize: number) => void} = {};
+    private ytdlUpdates: { onCheckingForUpdates: () => void; onYtdlVersionCheckComplete: (totalSize: number) => void; onComplete: () => void; } | undefined;
 
     constructor () {
         window.api?.receive('downloadTaskMetaData', (message) => {
@@ -37,12 +43,14 @@ class ElectronJsApi {
         window.api?.receive('downloadTaskProgress', (message) => {
             console.log(message);
             this.onDataCallbacks[message.callbackId]?.(message.percentageComplete);
+            if (message.percentageComplete === 1 && this.onDataCallbacks[message.callbackId]) {
+                delete this.onDataCallbacks[message.callbackId];
+            }
         });
         window.api?.receive('downloadTaskDownloaded', (message) => {
             console.log(message);
             this.callbacks[`downloaded-${message.callbackId}`].resolve();
             delete this.callbacks[`downloaded-${message.callbackId}`];
-            delete this.onDataCallbacks[message.callbackId];
         });
         window.api?.receive('downloadTaskFinished', (message) => {
             console.log(message);
@@ -65,6 +73,40 @@ class ElectronJsApi {
             this.callbacks[message.callbackId]?.resolve(message.value);
             delete this.callbacks[message.callbackId];
         });
+
+        window.api?.receive('onYtdlUpdateCheck', (message) => {
+            this.ytdlUpdates?.onCheckingForUpdates();
+        });
+        window.api?.receive('onYtdlVersionCheckComplete', (message) => {
+            this.ytdlUpdates?.onYtdlVersionCheckComplete(message.value);
+        });
+        window.api?.receive('onYtdlData', (message) => {
+            this.ytdlUpdateCallbacks[message.variantName]?.(message.resolvedLength);
+        });
+        window.api?.receive('onYtdlUpdateComplete', (message) => {
+            this.ytdlUpdates?.onComplete();
+        });
+    }
+
+    public addYtdlDependencyListeners(
+        onCheckingForUpdates: () => void,
+        onYtdlVersionCheckComplete: (totalDownloadSize: number) => void,
+        onYtdlData: (resolvedSize: number) => void,
+        onYtdlpData: (resolvedSize: number) => void,
+        onComplete: () => void
+    ) {
+        this.ytdlUpdates = {
+            onCheckingForUpdates,
+            onYtdlVersionCheckComplete,
+            onComplete,
+        }
+        this.ytdlUpdateCallbacks['youtube-dl.exe'] = onYtdlData;
+        this.ytdlUpdateCallbacks['yt-dlp.exe'] = onYtdlpData;
+    }
+
+    public removeYtdlDependencyListeners() {
+        delete this.ytdlUpdates;
+        this.ytdlUpdateCallbacks = {};
     }
 
     public startDownloadTask(

@@ -11,6 +11,7 @@ import { StrictMode } from 'react';
 import { Settings } from './components/settings';
 import { useState } from 'react';
 import { useTransition, animated } from "react-spring";
+import { DependencyUpdateBanner } from './components/dependencyUpdateBanner';
 // import { Title } from './components/title';
 
 export interface DownloadTaskItem { 
@@ -135,6 +136,7 @@ export const App = () => {
                         </animated.div>)
                     })}
                     </Stack>
+                    <DependencyUpdateBanner />
                 </Container >
             </ThemeProvider>
         </StrictMode>

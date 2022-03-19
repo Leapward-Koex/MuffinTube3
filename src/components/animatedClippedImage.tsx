@@ -27,7 +27,7 @@ export const AnimatedClippedImage = ({ imageUrl, percentage, aborted }: Animated
     const canvas = canvasRef.current;
     const image = imageRef.current;
 
-    const timeToAnimateBlock = 400;
+    const timeToAnimateBlock = 1000;
 
     function usePrevious(value: number) {
         const ref = useRef(0);

@@ -1,15 +1,17 @@
 import https from 'https';
 import fetch from 'node-fetch';
 import fs, { constants as fsConstants } from 'fs';
-import { app } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import path from 'path';
 import { ensureDirectoryExists } from './fileUtilities';
 import log from 'electron-log'
+import { YtdlDownloadUpdatePayload } from './electronNativeApi';
 
 export interface GitHubReleaseAsset {
     browser_download_url: string,
     content_type: string,
-    name: string
+    name: string,
+    size: number
 }
 export interface GitHubRelease {
     published_at: string,
@@ -21,25 +23,41 @@ export interface GitHubRelease {
 
 export class GitHubManager {
 
+    constructor(
+        private window: BrowserWindow
+    ) {
+
+    }
+
     public async downloadAssetFromRelease(release: GitHubRelease, assetName: 'youtube-dl.exe' | 'yt-dlp.exe') {
         const latestWindowsBinary = release.assets.find((asset) => asset.name === assetName);
         await ensureDirectoryExists(path.join(app.getPath('userData'), 'binaries', 'ytdl'));
         const destinationPath = path.join(app.getPath('userData'), 'binaries', 'ytdl', assetName);
         log.info(`Downloading ${assetName} to ${destinationPath}`);
-        return new Promise<void>((resolve, reject) => {
-            fetch(latestWindowsBinary.browser_download_url).then((response) => {
-                const fileStream = fs.createWriteStream(destinationPath);
-                response.body.on('error', (error) => {
-                    log.error(`Downloading ${assetName} failed: ${JSON.stringify(error)}`);
-                    reject();
+        return {
+            task: new Promise<void>((resolve, reject) => {
+                fetch(latestWindowsBinary.browser_download_url).then((response) => {
+                    const fileStream = fs.createWriteStream(destinationPath);
+                    // const fileSize = response.body.size
+                    let resolvedLength = 0;
+                    response.body.on('error', (error) => {
+                        log.error(`Downloading ${assetName} failed: ${JSON.stringify(error)}`);
+                        reject();
+                    });
+                    response.body.on('data', (data: Buffer) => {
+                        resolvedLength += data.length;
+                        const updatePayload: YtdlDownloadUpdatePayload = { variantName: assetName, fileSize: latestWindowsBinary.size, resolvedLength };
+                        this.window.webContents.send('onYtdlData', updatePayload)
+                    });
+                    fileStream.on('finish', () => {
+                        log.info(`Downloading ${assetName} succeeded`);
+                        resolve();
+                    });
+                    response.body.pipe(fileStream);
                 });
-                fileStream.on('finish', () => {
-                    log.error(`Downloading ${assetName} succeeded`);
-                    resolve();
-                });
-                response.body.pipe(fileStream);
-            });
-        })
+            }),
+            size: latestWindowsBinary.size,
+        }
     }
 
     public getReleases(repoPath: '/repos/ytdl-org/youtube-dl/releases' | '/repos/yt-dlp/yt-dlp/releases') {

@@ -43,6 +43,12 @@ export interface DownloadTaskMetaDataPayload {
     metaData: YtResponse;
 }
 
+export interface YtdlDownloadUpdatePayload { 
+    variantName: string,
+    fileSize: number,
+    resolvedLength: number
+}
+
 export class ElectronNativeApi {
 
     private downloadTasks: {[callbackId: string]: DownloadTaskHandler} = {};
@@ -105,7 +111,8 @@ export class ElectronNativeApi {
             console.log('Recieved', resolvedLength, 'bytes of', totalLength, 'bytes');
             const downloadTaskUpdate: DownloadTaskUpdateType = { callbackId, percentageComplete: resolvedLength / totalLength }
             this.window.webContents.send('downloadTaskProgress', downloadTaskUpdate)
-        }, 100, { leading: true, trailing: true });
+        }, 1000, { leading: true, trailing: true });
+
         downloadHandler.startTask((metaData) => {
             const downloadTaskMetaDataMessage: DownloadTaskMetaDataPayload = { callbackId, metaData };
             this.window.webContents.send('downloadTaskMetaData', downloadTaskMetaDataMessage)

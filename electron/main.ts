@@ -19,16 +19,14 @@ class MuffinTube {
                 app.quit();
             }
         });
-        const ytdlManager = new YtdlManager();
-        const updateYtdl = ytdlManager.checkForUpdate();
         app.on('activate', () => {
             if (!this.mainWindow) {
-                this.createWindow(updateYtdl);
+                this.createWindow();
             }
         });
     }
 
-    private createWindow(updateYtdl?: Promise<void>) {
+    private createWindow() {
         this.mainWindow = new BrowserWindow({ 
             width: 600, height: 600, show: false,
             webPreferences: {
@@ -51,9 +49,8 @@ class MuffinTube {
         })
     
         this.mainWindow.once('ready-to-show', async () => {
-            if (updateYtdl) {
-                await updateYtdl;
-            }
+            const ytdlManager = new YtdlManager(this.mainWindow);
+            ytdlManager.checkForUpdate();
             this.mainWindow.show();
         });
     
