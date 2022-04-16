@@ -11,3 +11,5 @@ The thumbnail of the video is embeded as the album art and the title of the vide
 The supports 2 youtube-dl variants, Youtube-DL (https://github.com/ytdl-org/youtube-dl) and YT-DLP (https://github.com/yt-dlp/yt-dlp). YT-DLP is generally faster on most types of videos. The app automatically checks for updated version of the two youtube-dl variants so the app will never be broken due to outdated youtube-dl variants.
 
 The variant of youtube-dl can be selected from the settings menu.
+
+![image](https://user-images.githubusercontent.com/30615050/163665634-3beb0d5c-69cc-4fd4-a0f5-9dac24e51dcd.png)
