@@ -1,46 +1,13 @@
-# Getting Started with Create React App
+# MuffinTube3
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+My third attempt at making a YoutubeDl GUI.
 
-## Available Scripts
+This time its a Electron app with a React renderer.
 
-In the project directory, you can run:
+This app is created for windows and has a simple GUI for converting youtube videos to MP3.
+Audio is ripped from the video at the highest availalbe quality, converted to ~240Kb/s VBR MP3 files using libmp3lame.
+The thumbnail of the video is embeded as the album art and the title of the video is by default set as the MP3 track name. The trackname and track artist name can be changed from within the UI.
 
-### `npm start`
+The supports 2 youtube-dl variants, Youtube-DL (https://github.com/ytdl-org/youtube-dl) and YT-DLP (https://github.com/yt-dlp/yt-dlp). YT-DLP is generally faster on most types of videos. The app automatically checks for updated version of the two youtube-dl variants so the app will never be broken due to outdated youtube-dl variants.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+The variant of youtube-dl can be selected from the settings menu.
