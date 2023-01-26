@@ -6,13 +6,13 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { DownloadStatus, DownloadTask } from './components/downloadTask';
-import { electronJsApi } from './apiService/electronJsApi';
 import { StrictMode } from 'react';
 import { Settings } from './components/settings';
 import { useState } from 'react';
 import { useTransition, animated } from "react-spring";
 import { DependencyUpdateBanner } from './components/dependencyUpdateBanner';
 import { CapacitorJsApi } from 'muffintube-api';
+import { jsApi } from './apiService/agnosticJsApi';
 // import { Title } from './components/title';
 
 export interface DownloadTaskItem { 
@@ -42,7 +42,7 @@ export const App = () => {
     const onVideoSubmitted = async (videoUrl: string, thumbnailUrl: string) => {
 		const response = await CapacitorJsApi.echo({value: "Hello"});
 		alert(response);
-        const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl);
+        const videoDownloadTask = jsApi.startDownloadTask(videoUrl);
 
         downloadTasks.unshift({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', videoTitle: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData, mp3Path: ''});
         setDownloadTasks([...downloadTasks]);
@@ -72,7 +72,7 @@ export const App = () => {
     }
 
     const onVideoAborted = (callbackId: string) => {
-        electronJsApi.abortDownload(callbackId);
+        jsApi.abortDownload(callbackId);
         updateVideoStatus(callbackId, { videoStatus: DownloadStatus.Aborted });
     }
 
@@ -133,7 +133,7 @@ export const App = () => {
                                 percentageCompleted={item.percentComplete}
                                 status={item.status}
                                 abortDownload={() => onVideoAborted(item.videoCallbackId)}
-                                openFolder={() => electronJsApi.openFileInExplorer(item.mp3Path)}
+                                openFolder={() => jsApi.openFileInExplorer(item.mp3Path)}
                                 clearClicked={() => onClearClicked(item.videoCallbackId)}
                                 />
                         </animated.div>)

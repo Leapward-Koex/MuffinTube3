@@ -3,7 +3,7 @@ import Snackbar from '@mui/material/Snackbar';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Typography } from '@mui/material';
 import Slide, { SlideProps } from '@mui/material/Slide';
-import { electronJsApi } from '../apiService/electronJsApi';
+import { jsApi } from '../apiService/agnosticJsApi';
 
 type TransitionProps = Omit<SlideProps, 'direction'>;
 function TransitionUp(props: TransitionProps) {
@@ -19,7 +19,7 @@ export const DependencyUpdateBanner = () => {
 
     useEffect(() => {
         let timeout: NodeJS.Timeout;
-        electronJsApi.addYtdlDependencyListeners(
+        jsApi.addYtdlDependencyListeners(
             () => {
                 setMessage('Checking for YTDL dependency updates...');
                 setVisible(true);
@@ -49,7 +49,7 @@ export const DependencyUpdateBanner = () => {
             if (timeout) {
                 clearTimeout(timeout);
             }
-            electronJsApi.removeYtdlDependencyListeners()
+            jsApi.removeYtdlDependencyListeners()
         }
     }, [totalDownloadSize])
 

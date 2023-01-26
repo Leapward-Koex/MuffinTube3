@@ -2,7 +2,7 @@ import { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import SaveIcon from '@mui/icons-material/Save';
-import { electronJsApi } from '../apiService/electronJsApi';
+import { jsApi } from '../apiService/agnosticJsApi';
 
 type TagEditorProps = {
     videoCallbackId: string,
@@ -18,7 +18,7 @@ export const TagEditor = ({videoCallbackId, initialVideoTitle, onClose}: TagEdit
     }
 
     const handleSaveClicked = () => {
-        electronJsApi.setSongTags(videoCallbackId, songTitle, artistName);
+        jsApi.setSongTags(videoCallbackId, songTitle, artistName);
         onClose();
     }
     

@@ -7,7 +7,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Fab from '@mui/material/Fab';
 import Button from '@mui/material/Button';
-import { electronJsApi } from '../apiService/electronJsApi';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -17,6 +16,7 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { settingsKey } from '../sharedEnums';
+import { jsApi } from '../apiService/agnosticJsApi';
 
 export const Settings = () => {
     const [open, setOpen] = useState(false);
@@ -24,7 +24,7 @@ export const Settings = () => {
     const [ytdlVariant, setYtdlVariant] = useState<'ytdl' | 'ytdlp'>();
 
     const handleClickOpen = async () => {
-        const [savedDownloadLocation, savedYtdlVariant] = await Promise.all([electronJsApi.getSetting(settingsKey.downloadPath), electronJsApi.getSetting(settingsKey.ytdlVariant)])
+        const [savedDownloadLocation, savedYtdlVariant] = await Promise.all([jsApi.getSetting(settingsKey.downloadPath), jsApi.getSetting(settingsKey.ytdlVariant)])
         if (savedDownloadLocation) {
             setDownloadLocation(savedDownloadLocation);
         }
@@ -35,7 +35,7 @@ export const Settings = () => {
     };
 
     const handleFolderPickerClicked = () => {
-        electronJsApi.openFolderPicker().then((selectedFolder) => {
+        jsApi.openFolderPicker().then((selectedFolder) => {
             if (selectedFolder) {
                 setDownloadLocation(selectedFolder);
             }
@@ -45,10 +45,10 @@ export const Settings = () => {
     const handleClose = (savePath: boolean) => {
         setOpen(false);
         if (savePath) {
-            electronJsApi.setSetting(settingsKey.downloadPath, downloadLocation)
+            jsApi.setSetting(settingsKey.downloadPath, downloadLocation)
         }
         if (ytdlVariant) {
-            electronJsApi.setSetting(settingsKey.ytdlVariant, ytdlVariant)
+            jsApi.setSetting(settingsKey.ytdlVariant, ytdlVariant)
         }
     };
 

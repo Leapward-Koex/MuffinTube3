@@ -1,6 +1,7 @@
 import { YtResponse } from 'youtube-dl-exec';
 import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, ValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload, SetSongTagsPayload, YtdlDownloadUpdatePayload } from '../../electron/electronNativeApi'
 import { settingsKey } from '../sharedEnums';
+import { IJsApi } from './IJsApi';
 
 interface JsExposedApi {
     send(channel: 'startDownloadTask', params: DownloadTaskStartType): void;
@@ -29,7 +30,7 @@ declare global {
     }
 }
 
-class ElectronJsApi {
+class ElectronJsApi implements IJsApi {
     private callbacks: {[callbackId: string]: { resolve: Function, reject: Function }} = {};
     private onDataCallbacks: {[callbackId: string]: (percentageComplete: number) => void} = {};
     private ytdlUpdateCallbacks: {[variant: string]: (resolvedSize: number) => void} = {};
