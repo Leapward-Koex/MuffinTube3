@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MuffinTube Mobile</string>
+    <string name="title_activity_main">MuffinTube Mobile</string>
+    <string name="package_name">com.yorha.muffintube</string>
+    <string name="custom_url_scheme">com.yorha.muffintube</string>
+</resources>

@@ -12,6 +12,7 @@ import { Settings } from './components/settings';
 import { useState } from 'react';
 import { useTransition, animated } from "react-spring";
 import { DependencyUpdateBanner } from './components/dependencyUpdateBanner';
+import { CapacitorJsApi } from 'muffintube-api';
 // import { Title } from './components/title';
 
 export interface DownloadTaskItem { 
@@ -39,6 +40,8 @@ export const App = () => {
     }
 
     const onVideoSubmitted = async (videoUrl: string, thumbnailUrl: string) => {
+		const response = await CapacitorJsApi.echo({value: "Hello"});
+		alert(response);
         const videoDownloadTask = electronJsApi.startDownloadTask(videoUrl);
 
         downloadTasks.unshift({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', videoTitle: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData, mp3Path: ''});
