@@ -5,6 +5,7 @@ import { YtResponse } from "youtube-dl-exec";
 import { doesFileExist } from "./fileUtilities";
 import settingManager from './settingManager';
 import { settingsKey } from "../src/sharedEnums";
+import { YoutubeVideoMetaData } from "../src/apiService/IJsApi";
 
 export interface DownloadTaskStartType {
     videoUrl: string;
@@ -40,7 +41,7 @@ export interface VoidCallbackPayload {
 
 export interface DownloadTaskMetaDataPayload {
     callbackId: string;
-    metaData: YtResponse;
+    metaData: YoutubeVideoMetaData;
 }
 
 export interface YtdlDownloadUpdatePayload { 

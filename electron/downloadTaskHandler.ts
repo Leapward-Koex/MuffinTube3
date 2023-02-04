@@ -11,6 +11,7 @@ import { deleteFile, ensureDirectoryExists, ensureEmptyFileExists } from './file
 import settingManager from './settingManager'
 import { settingsKey } from '../src/sharedEnums'
 import log from 'electron-log'
+import { YoutubeVideoMetaData } from '../src/apiService/IJsApi'
 
 export interface VideoMetaData {
     path: string,
@@ -38,7 +39,7 @@ export class DownloadTaskHandler {
     }
 
     public async startTask(
-        onMetaData: (metaData: YtResponse) => void,
+        onMetaData: (metaData: YoutubeVideoMetaData) => void,
         onData: (totalLength: number, resolvedLength: number) => void,
         onDownloadComplete: () => void
     ) {
@@ -48,12 +49,12 @@ export class DownloadTaskHandler {
         if (!this.songTitle) {
             this.songTitle = metaData.title;
         }
-        this.thumbnailUrl = metaData.thumbnail;
+        this.thumbnailUrl = metaData.imageUrl;
         this.audioPath = await this.downloadAudio(
-            metaData.filesize,
-            metaData.url,
+            metaData.fileSize,
+            metaData.downloadUrl,
             metaData.title,
-            metaData.ext,
+            metaData.extension,
             onData
         );
         onDownloadComplete();
@@ -116,7 +117,7 @@ export class DownloadTaskHandler {
         const ytdlPath = path.join(app.getPath('userData'), 'binaries', 'ytdl', ytdlVariantBinary);
         log.info(`Acquiring meta data with ${ytdlPath}`)
         const youtubedl = createYtdl(ytdlPath);
-        return youtubedl(this.videoUrl, {
+        const youtubeResponse = await youtubedl(this.videoUrl, {
             dumpSingleJson: true,
             noWarnings: true,
             noCheckCertificate: true,
@@ -125,6 +126,13 @@ export class DownloadTaskHandler {
             youtubeSkipDashManifest: true,
             referer: this.videoUrl
         });
+		return {
+			imageUrl: youtubeResponse.thumbnail,
+			title: youtubeResponse.fulltitle,
+			fileSize: youtubeResponse.filesize,
+			extension: youtubeResponse.ext,
+			downloadUrl: youtubeResponse.url
+		}
     }
 
     private downloadAudio(fileSize: number, downloadUrl: string, videoTitle: string, formatExtension: string, onData: (totalLength: number, resolvedLength: number) => void) {

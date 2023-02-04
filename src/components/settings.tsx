@@ -17,11 +17,15 @@ import IconButton from '@mui/material/IconButton';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { settingsKey } from '../sharedEnums';
 import { jsApi } from '../apiService/agnosticJsApi';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material';
 
 export const Settings = () => {
     const [open, setOpen] = useState(false);
     const [downloadLocation, setDownloadLocation] = useState('');
     const [ytdlVariant, setYtdlVariant] = useState<'ytdl' | 'ytdlp'>();
+	const theme = useTheme();
+	const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
     const handleClickOpen = async () => {
         const [savedDownloadLocation, savedYtdlVariant] = await Promise.all([jsApi.getSetting(settingsKey.downloadPath), jsApi.getSetting(settingsKey.ytdlVariant)])
@@ -62,7 +66,8 @@ export const Settings = () => {
                 onClose={handleClose}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
-                PaperProps={{ sx: { position: "fixed", top: 10, m: 0, width: 500 } }}
+				PaperProps={{ sx: { position: "fixed", top: 10, m: 0, width: fullScreen ? '100%' : 500 } }}
+                fullScreen={fullScreen}
             >
                 <DialogTitle id="alert-dialog-title">
                     {"MuffinTube Settings"}
@@ -87,7 +92,8 @@ export const Settings = () => {
                             </IconButton>
                         </Tooltip>
                     </div>
-                    <FormControl>
+					{jsApi.getPlatForm() === 'electron' &&
+					(<FormControl>
                         <FormLabel id="demo-radio-buttons-group-label">Youtube-dl variant</FormLabel>
                         <RadioGroup
                             aria-labelledby="demo-radio-buttons-group-label"
@@ -105,7 +111,7 @@ export const Settings = () => {
                             </Tooltip>
 
                         </RadioGroup>
-                    </FormControl>
+                    </FormControl>)}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => handleClose(true)}>Save</Button>

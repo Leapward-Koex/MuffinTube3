@@ -1,5 +1,11 @@
-import { YtResponse } from "youtube-dl-exec";
 import { settingsKey } from "../sharedEnums";
+
+export interface YoutubeVideoMetaData {
+	title: string,
+	imageUrl: string,
+	fileSize: number,
+	downloadUrl: string
+}
 
 export interface IJsApi {
 	 addYtdlDependencyListeners: (
@@ -16,7 +22,7 @@ export interface IJsApi {
         videoUrl: string
     ) => {
 		taskFinished: Promise<string>,
-		metaData: Promise<YtResponse>,
+		metaData: Promise<YoutubeVideoMetaData>,
 		downloaded: Promise<void>,
 		onData: (onDataHandler: (percentageComplete: number) => void) => void;
 		callbackId: string,
@@ -33,4 +39,6 @@ export interface IJsApi {
     setSetting: (settingKey: settingsKey, value: any) => Promise<void>;
 
 	openFolderPicker: () => Promise<string>;
+
+	getPlatForm: () => 'capacitor' | 'electron'
 }

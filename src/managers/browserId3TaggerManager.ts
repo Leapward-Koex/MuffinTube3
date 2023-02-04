@@ -1,8 +1,10 @@
-import fs from 'fs'
-import fetch from 'node-fetch'
+//@ts-ignore
 import ID3Writer from 'browser-id3-writer';
+import { CapacitorJsApi } from 'muffintube-api';
+import {Buffer} from 'buffer';
 
-export class Id3MetaDataTagger {    
+
+export class BrowserId3TaggerManager {
     public async embedTags(mp3Path: string, songTitle: string, artistName: string, thumbnailUrl: string) {
         const mp3Buffer = await this.readMp3File(mp3Path);
         const thumbnailBuffer = await this.downloadThumbnail(thumbnailUrl);
@@ -19,26 +21,27 @@ export class Id3MetaDataTagger {
         await this.writeMp3File(mp3Path, Buffer.from(writer.arrayBuffer))
     }
 
-    private async downloadThumbnail(thumbnailUrl: string) {
+	private async downloadThumbnail(thumbnailUrl: string) {
         const res = await fetch(thumbnailUrl)
         return await res.arrayBuffer()
     }
 
-    private readMp3File(mp3Path: string) {
-        return new Promise<Buffer>((resolve) => {
-            fs.readFile(mp3Path, null , (err, data) => {
-                if (err) throw err
-                resolve(data);
-            });
-        });
+	private async readMp3File(mp3Path: string) {
+		const fileReadData = await CapacitorJsApi.readFileAsBase64({value: mp3Path});
+		return this.base64ToArrayBuffer(fileReadData.value)
     }
 
-    private writeMp3File(mp3Path: string, buffer: Buffer) {
-        return new Promise<void>((resolve) => {
-            fs.writeFile(mp3Path, buffer, (err) => {
-                if (err) throw err
-                resolve();
-            });
-        });
+	private writeMp3File(mp3Path: string, buffer: Buffer) {
+		return CapacitorJsApi.writeFileFromBase64({ path: mp3Path, data: buffer.toString('base64') })
     }
+
+	private base64ToArrayBuffer(base64: string) {
+		var binary_string = window.atob(base64);
+		var len = binary_string.length;
+		var bytes = new Uint8Array(len);
+		for (var i = 0; i < len; i++) {
+			bytes[i] = binary_string.charCodeAt(i);
+		}
+		return bytes.buffer;
+	}
 }

@@ -50,7 +50,7 @@ export const App = () => {
         videoDownloadTask.metaData.then((metaData) => {
             const matchingTask = downloadTasks.find((task) => task.videoCallbackId === videoDownloadTask.callbackId);
             if (matchingTask) {
-                matchingTask.thumbnailUrl = metaData.thumbnail;
+                matchingTask.thumbnailUrl = metaData.imageUrl;
                 matchingTask.status = DownloadStatus.DownloadingAudio;
                 matchingTask.videoTitle = metaData.title;
                 setDownloadTasks([...downloadTasks]);

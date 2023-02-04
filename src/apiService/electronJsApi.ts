@@ -1,7 +1,7 @@
 import { YtResponse } from 'youtube-dl-exec';
 import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, ValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload, SetSongTagsPayload, YtdlDownloadUpdatePayload } from '../../electron/electronNativeApi'
 import { settingsKey } from '../sharedEnums';
-import { IJsApi } from './IJsApi';
+import { IJsApi, YoutubeVideoMetaData } from './IJsApi';
 
 interface JsExposedApi {
     send(channel: 'startDownloadTask', params: DownloadTaskStartType): void;
@@ -120,7 +120,7 @@ class ElectronJsApi implements IJsApi {
                 this.callbacks[callbackId] = { resolve, reject };
                 window.api?.send('startDownloadTask', { videoUrl, callbackId })
             }),
-            metaData: new Promise<YtResponse>((resolve, reject) => {
+            metaData: new Promise<YoutubeVideoMetaData>((resolve, reject) => {
                 this.callbacks[`meta-data-${callbackId}`] = { resolve, reject };
             }),
             downloaded: new Promise<void>((resolve, reject) => {
@@ -183,6 +183,10 @@ class ElectronJsApi implements IJsApi {
     private generateCallbackId() {
         return (Math.random() + 1).toString(36).substring(2);
     }
+
+	public getPlatForm(): 'capacitor' | 'electron' {
+		return 'electron';
+	}
 }
 
 

@@ -4,7 +4,11 @@ const config: CapacitorConfig = {
   appId: 'com.yorha.muffintube',
   appName: 'MuffinTube Mobile',
   webDir: 'build',
-  bundledWebRuntime: false
+  bundledWebRuntime: false,
+  server: {
+    "hostname": "youtube.com",
+    "androidScheme": "https"
+}
 };
 
 export default config;
