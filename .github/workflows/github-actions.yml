@@ -11,6 +11,11 @@ jobs:
       with:
         node-version: 16.x
 
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin' # See 'Supported distributions' for available options
+        java-version: '11'
+
     - name: Build capacitor plugin
       run: |
         cd capacitor-plugin-api
