@@ -3,7 +3,7 @@ import { IJsApi, YoutubeVideoMetaData } from "./IJsApi";
 import { Preferences } from '@capacitor/preferences';
 import { CapacitorJsApi as NativeApi } from 'muffintube-api'
 import { Plugin } from "@capacitor/core";
-import { DownloadTaskMetaDataPayload, DownloadTaskUpdateType, ValuePayload, VoidCallbackPayload } from "../../electron/electronNativeApi";
+import { DownloadTaskMetaDataPayload, DownloadTaskUpdateType, ValuePayload } from "../../electron/electronNativeApi";
 import { BrowserId3TaggerManager } from "../managers/browserId3TaggerManager";
 
 class CapacitorJsApi implements IJsApi {
