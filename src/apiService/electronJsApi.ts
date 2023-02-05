@@ -141,7 +141,7 @@ class ElectronJsApi implements IJsApi {
         window.api?.send('abortDownload', { callbackId })
     }
 
-    public setSongTags(callbackId: string, songTitle: string, artistName: string) {
+    public setSongTags(callbackId: string, songTitle: string, artistName: string, thumbnailUrl: string) {
         window.api?.send('setSongTags', { callbackId, songTitle, artistName });
     }
 

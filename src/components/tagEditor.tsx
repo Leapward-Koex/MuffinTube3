@@ -6,10 +6,12 @@ import { jsApi } from '../apiService/agnosticJsApi';
 
 type TagEditorProps = {
     videoCallbackId: string,
+	mp3Path: string,
+	thumbnailUrl: string,
     initialVideoTitle: string,
     onClose: () => void
 }
-export const TagEditor = ({videoCallbackId, initialVideoTitle, onClose}: TagEditorProps) => {
+export const TagEditor = ({videoCallbackId, initialVideoTitle, onClose, mp3Path, thumbnailUrl}: TagEditorProps) => {
     const [songTitle, setSongTitle] = useState('');
     const [artistName, setArtistName] = useState('');
 
@@ -18,7 +20,7 @@ export const TagEditor = ({videoCallbackId, initialVideoTitle, onClose}: TagEdit
     }
 
     const handleSaveClicked = () => {
-        jsApi.setSongTags(videoCallbackId, songTitle, artistName);
+        jsApi.setSongTags(videoCallbackId, mp3Path, songTitle, artistName, thumbnailUrl);
         onClose();
     }
     

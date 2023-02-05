@@ -132,6 +132,7 @@ export const App = () => {
                                 videoTitle={item.videoTitle}
                                 percentageCompleted={item.percentComplete}
                                 status={item.status}
+								mp3Path={item.mp3Path}
                                 abortDownload={() => onVideoAborted(item.videoCallbackId)}
                                 openFolder={() => jsApi.openFileInExplorer(item.mp3Path)}
                                 clearClicked={() => onClearClicked(item.videoCallbackId)}

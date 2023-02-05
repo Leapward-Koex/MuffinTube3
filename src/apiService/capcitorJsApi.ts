@@ -119,8 +119,9 @@ class CapacitorJsApi implements IJsApi {
 
 	}
 
-	public setSongTags(callbackId: string, songTitle: string, artistName: string) {
-
+	public setSongTags(callbackId: string, mp3Path: string, songTitle: string, artistName: string) {
+		const browserTagger = new BrowserId3TaggerManager();
+		browserTagger.embedTags(mp3Path, songTitle, artistName)
 	}
 
 	public async getSetting(settingKey: settingsKey) {

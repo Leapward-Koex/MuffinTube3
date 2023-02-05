@@ -10,8 +10,15 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 16.x
+
+    - name: Build capacitor plugin
+      run: |
+        cd capacitor-plugin-api
+        npm ci
+        npm run build
+        cd ..
         
-    - name: Npm CI
+    - name: Npm CI Renderer
       run: |
         npm ci
         
@@ -20,6 +27,11 @@ jobs:
         set CI=false
         set process.env.CI=false
         npm run build-renderer
+
+    - name: Build Android Capacitor app
+      run: |
+        npx cap copy android
+        npx cap build android --androidreleasetype APK --keystorepath app/my-upload-key.keystore --keystorepass ${{ secrets.SIGNING_STORE_PASSWORD }} --keystorealias ${{ secrets.SIGNING_KEY_ALIAS }} --keystorealiaspass ${{ secrets.SIGNING_KEY_PASSWORD }}
         
     - name: Build electron
       run: |

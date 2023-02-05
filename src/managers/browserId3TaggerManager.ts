@@ -5,17 +5,20 @@ import {Buffer} from 'buffer';
 
 
 export class BrowserId3TaggerManager {
-    public async embedTags(mp3Path: string, songTitle: string, artistName: string, thumbnailUrl: string) {
+    public async embedTags(mp3Path: string, songTitle: string, artistName: string, thumbnailUrl?: string) {
         const mp3Buffer = await this.readMp3File(mp3Path);
-        const thumbnailBuffer = await this.downloadThumbnail(thumbnailUrl);
         const writer = new ID3Writer(mp3Buffer) as any; // https://www.npmjs.com/package/browser-id3-writer
         writer.setFrame('TIT2', songTitle)
             .setFrame('TPE1', [artistName])
-            .setFrame('APIC', {
+
+		if (thumbnailUrl) {
+			const thumbnailBuffer = await this.downloadThumbnail(thumbnailUrl);
+			writer.setFrame('APIC', {
                 type: 3, // Front cover
                 data: thumbnailBuffer,
                 description: ''
             });
+		}
         writer.addTag();
         
         await this.writeMp3File(mp3Path, Buffer.from(writer.arrayBuffer))

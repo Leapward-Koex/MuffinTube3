@@ -32,7 +32,7 @@ export interface IJsApi {
 
     abortDownload: (callbackId: string)  => void;
 
-    setSongTags: (callbackId: string, songTitle: string, artistName: string) => void;
+    setSongTags: (callbackId: string, mp3Path: string, songTitle: string, artistName: string, thumbnailUrl: string) => void;
 
     getSetting: (settingKey: settingsKey) => Promise<string>;
 
