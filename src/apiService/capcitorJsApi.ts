@@ -1,4 +1,3 @@
-import { YtResponse } from "youtube-dl-exec";
 import { settingsKey } from "../sharedEnums";
 import { IJsApi, YoutubeVideoMetaData } from "./IJsApi";
 import { Preferences } from '@capacitor/preferences';

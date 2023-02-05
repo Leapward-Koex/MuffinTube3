@@ -1,4 +1,4 @@
-import { create as createYtdl, YtResponse} from 'youtube-dl-exec'
+import { create as createYtdl } from 'youtube-dl-exec'
 import path from 'path'
 import { app } from 'electron'
 import fs from 'fs'
@@ -120,7 +120,6 @@ export class DownloadTaskHandler {
         const youtubeResponse = await youtubedl(this.videoUrl, {
             dumpSingleJson: true,
             noWarnings: true,
-            noCheckCertificate: true,
             format: 'bestaudio',
             noPlaylist: true,
             youtubeSkipDashManifest: true,

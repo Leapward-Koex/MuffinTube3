@@ -1,7 +1,6 @@
 import { BrowserWindow, ipcMain, shell, dialog } from "electron";
 import { DownloadTaskHandler } from "./downloadTaskHandler";
 import throttle from 'lodash.throttle';
-import { YtResponse } from "youtube-dl-exec";
 import { doesFileExist } from "./fileUtilities";
 import settingManager from './settingManager';
 import { settingsKey } from "../src/sharedEnums";

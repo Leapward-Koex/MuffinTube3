@@ -1,4 +1,3 @@
-import { YtResponse } from 'youtube-dl-exec';
 import { VoidCallbackPayload, DownloadTaskStartType, DownloadTaskUpdateType, ValuePayload, SetSettingPayload, GetSettingPayload, DownloadTaskMetaDataPayload, SetSongTagsPayload, YtdlDownloadUpdatePayload } from '../../electron/electronNativeApi'
 import { settingsKey } from '../sharedEnums';
 import { IJsApi, YoutubeVideoMetaData } from './IJsApi';
