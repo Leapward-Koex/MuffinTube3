@@ -38,6 +38,15 @@ jobs:
         npx cap copy android
         npx cap sync
         npx cap build android --androidreleasetype APK --keystorepath app/my-upload-key.keystore --keystorepass ${{ secrets.SIGNING_STORE_PASSWORD }} --keystorealias ${{ secrets.SIGNING_KEY_ALIAS }} --keystorealiaspass ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+    - name: Upload Android Capacitor build
+        uses: actions/upload-artifact@v3.0.0
+        with:
+          # Artifact name
+          name: MuffinTube-Android
+          # A file, directory or wildcard pattern that describes what to upload
+          path: android\app\build\outputs\apk\release\app-release-signed.apk
+          # The desired behavior if no files are found using the provided path.
         
     - name: Build electron
       run: |
@@ -62,7 +71,7 @@ jobs:
         # Other arguments to pass to the `electron-builder` command, e.g. configuration overrides
         args: -c.extraMetadata.main=build/electron/electron-bundle.js
 
-    - name: Upload a Build Artifact
+    - name: Upload electron build
       uses: actions/upload-artifact@v3.0.0
       with:
         # Artifact name
