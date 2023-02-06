@@ -35,8 +35,8 @@ jobs:
 
     - name: Build Android Capacitor app
       run: |
-        npx cap update android
         npx cap copy android
+        npx cap sync
         npx cap build android --androidreleasetype APK --keystorepath app/my-upload-key.keystore --keystorepass ${{ secrets.SIGNING_STORE_PASSWORD }} --keystorealias ${{ secrets.SIGNING_KEY_ALIAS }} --keystorealiaspass ${{ secrets.SIGNING_KEY_PASSWORD }}
         
     - name: Build electron
