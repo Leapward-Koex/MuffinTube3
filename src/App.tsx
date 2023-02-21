@@ -11,7 +11,6 @@ import { Settings } from './components/settings';
 import { useState } from 'react';
 import { useTransition, animated } from "react-spring";
 import { DependencyUpdateBanner } from './components/dependencyUpdateBanner';
-import { CapacitorJsApi } from 'muffintube-api';
 import { jsApi } from './apiService/agnosticJsApi';
 import useWindowDimensions from './hooks/getWindowDimensions';
 // import { Title } from './components/title';
