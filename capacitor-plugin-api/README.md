@@ -70,10 +70,10 @@ startYoutubeDownload(options: { callbackId: string; videoUrl: string; saveLocati
 ### initializeYoutubeDl()
 
 ```typescript
-initializeYoutubeDl() => Promise<boolean>
+initializeYoutubeDl() => Promise<{ value: string; }>
 ```
 
-**Returns:** <code>Promise&lt;boolean&gt;</code>
+**Returns:** <code>Promise&lt;{ value: string; }&gt;</code>
 
 --------------------
 

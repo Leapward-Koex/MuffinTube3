@@ -65,10 +65,10 @@ public class CapacitorJsApiPlugin extends Plugin {
         try {
             YoutubeDL.getInstance().init(getContext());
             FFmpeg.getInstance().init(getContext());
-            ret.put("value", true);
+            ret.put("value",  YoutubeDL.getInstance().updateYoutubeDL(getContext()) == YoutubeDL.UpdateStatus.DONE ? "Updated" : "Already up to date");
         } catch (YoutubeDLException e) {
             Log.e(TAG, "failed to initialize youtubedl-android", e);
-            ret.put("value", false);
+            ret.put("value", "Failed");
         }
 
         call.resolve(ret);
@@ -115,7 +115,6 @@ public class CapacitorJsApiPlugin extends Plugin {
             notifyListeners("downloadTaskDownloaded", ret);
 
             Files.move(Paths.get(fileTempOutput), Paths.get(finalFileOutput), StandardCopyOption.REPLACE_EXISTING);
-            Files.delete(Paths.get(fileTempOutput));
 
         } catch (Exception e) {
             e.printStackTrace();

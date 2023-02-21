@@ -19,7 +19,7 @@ export class CapacitorJsApiWeb extends WebPlugin implements CapacitorJsApiPlugin
 
   async initializeYoutubeDl() {
 	console.log('initializeYoutubeDl');
-    return false;
+    return { value: ""};
   }
 
   async openFolderPicker(): Promise<{ value: string }> {

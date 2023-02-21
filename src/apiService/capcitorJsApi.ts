@@ -64,14 +64,12 @@ class CapacitorJsApi implements IJsApi {
 		onYtdlVersionCheckComplete: (totalDownloadSize: number) => void,
 		onYtdlData: (resolvedSize: number) => void,
 		onYtdlpData: (resolvedSize: number) => void,
-		onComplete: () => void
+		onComplete: (version: string) => void
 	) {
 		onCheckingForUpdates();
-		NativeApi.initializeYoutubeDl().then((success) => {
+		NativeApi.initializeYoutubeDl().then((response) => {
 			onYtdlVersionCheckComplete(0);
-			if (success) {
-				onComplete();
-			}
+			onComplete(response.value);
 		}) 
 	};
 	

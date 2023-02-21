@@ -40,9 +40,9 @@ export const DependencyUpdateBanner = () => {
                     setResolvedDownloadSize((currentValue) => currentValue + value);
                 }
             },
-            () => {
-                setMessage('Finished checking for updates');
-                timeout = setTimeout(() => setVisible(false), 5000)
+            (version) => {
+                setMessage(`Finished checking for updates${version ? ` Current version: ${version}.` : ''}`);
+                timeout = setTimeout(() => setVisible(false), 8000)
             }
             )
         return () => {
@@ -56,12 +56,11 @@ export const DependencyUpdateBanner = () => {
 
     return (
     <>
-    <button onClick={() => setVisible(!visible)}>Click</button>
-        <Snackbar open={visible} autoHideDuration={6000} sx={{bottom: '15px!important', left: '15px!important', right: '15px!important' }} onClose={() => setVisible(false)}
+        <Snackbar open={visible} sx={{bottom: '15px!important', left: '15px!important', right: '15px!important' }} onClose={() => setVisible(false)}
             TransitionComponent={transition}
         >
-            <div style={{backgroundColor: 'whitesmoke', width: '100%', display: 'flex', flexDirection: 'row', borderRadius: 8, padding: 8}}>
-                <CircularProgress style={{padding: 10}} variant="determinate" value={(totalDownloadSize / resolvedDownloadSize) * 100} />
+            <div style={{backgroundColor: 'whitesmoke', width: '100%', display: 'flex', flexDirection: 'row', borderRadius: 8, padding: 8, justifyContent: 'center' }}>
+				{totalDownloadSize !== 0 && <CircularProgress style={{padding: 10}} variant="determinate" value={(totalDownloadSize / resolvedDownloadSize) * 100} />}
                 <Typography>{message}</Typography>
             </div>
         </Snackbar>

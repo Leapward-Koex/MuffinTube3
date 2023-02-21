@@ -13,6 +13,7 @@ import { useTransition, animated } from "react-spring";
 import { DependencyUpdateBanner } from './components/dependencyUpdateBanner';
 import { CapacitorJsApi } from 'muffintube-api';
 import { jsApi } from './apiService/agnosticJsApi';
+import useWindowDimensions from './hooks/getWindowDimensions';
 // import { Title } from './components/title';
 
 export interface DownloadTaskItem { 
@@ -27,6 +28,7 @@ export interface DownloadTaskItem {
 const padding = '20px';
 export const App = () => {
     const [downloadTasks, setDownloadTasks] = useState<DownloadTaskItem[]>([]);
+	const { width } = useWindowDimensions();
 
     const updateVideoStatus = (callbackId: string, update: { videoStatus: DownloadStatus, destinationPath?: string }) => {
         const matchingTask = downloadTasks.find((task) => task.videoCallbackId === callbackId);
@@ -40,8 +42,6 @@ export const App = () => {
     }
 
     const onVideoSubmitted = async (videoUrl: string, thumbnailUrl: string) => {
-		const response = await CapacitorJsApi.echo({value: "Hello"});
-		alert(response);
         const videoDownloadTask = jsApi.startDownloadTask(videoUrl);
 
         downloadTasks.unshift({videoCallbackId: videoDownloadTask.callbackId, thumbnailUrl: '', videoTitle: '', percentComplete: 0, status: DownloadStatus.AcquiringMetaData, mp3Path: ''});
@@ -92,7 +92,7 @@ export const App = () => {
     });
 
     let height = 0;
-    const downloadTaskHeight = 368;
+    const downloadTaskHeight = Math.min(width / 2.5, 300) + 50
     const transitions = useTransition(
         downloadTasks.map((task, i) =>  {
             height += downloadTaskHeight;

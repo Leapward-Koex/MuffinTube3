@@ -16,24 +16,28 @@ export const VideoInput = ({ onSubmit }: VideoInputProps) => {
         if (event.key === "Enter") {
             if (videoUrl) {
                 onSubmit(videoUrl, getThumbnailUrl(videoUrl));
+				setVideoUrl('');
             }
         }
     }
 
     return <Input
         autoFocus
+		value={videoUrl}
         onKeyDown={(event) => onKeyDownHandler(event)}
         onChange={(event) => setVideoUrl(event.target.value)}
         autoComplete='off'
         style={{
             backgroundColor: "white",
             width: '100%',
-            height: '50px',
-            borderRadius: '10px'
+            height: '40px',
         }}
         inputProps={{
             style: {
-                color: "red"
+                color: "#36a39d",
+				padding: 10,
+				fontSize: 18
+				
             }
         }}
         color="secondary"

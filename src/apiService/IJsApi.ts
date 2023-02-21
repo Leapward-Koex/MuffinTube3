@@ -13,7 +13,7 @@ export interface IJsApi {
         onYtdlVersionCheckComplete: (totalDownloadSize: number) => void,
         onYtdlData: (resolvedSize: number) => void,
         onYtdlpData: (resolvedSize: number) => void,
-        onComplete: () => void
+        onComplete: (version?: string) => void
     ) => void;
 
     removeYtdlDependencyListeners: () => void;
