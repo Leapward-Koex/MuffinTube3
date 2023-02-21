@@ -37,7 +37,19 @@ jobs:
       run: |
         npx cap copy android
         npx cap sync
-        npx cap build android --androidreleasetype APK --keystorepath app/my-upload-key.keystore --keystorepass ${{ secrets.SIGNING_STORE_PASSWORD }} --keystorealias ${{ secrets.SIGNING_KEY_ALIAS }} --keystorealiaspass ${{ secrets.SIGNING_KEY_PASSWORD }}
+        # npx cap build android --androidreleasetype APK --keystorepath app/my-upload-key.keystore --keystorepass ${{ secrets.SIGNING_STORE_PASSWORD }} --keystorealias ${{ secrets.SIGNING_KEY_ALIAS }} --keystorealiaspass ${{ secrets.SIGNING_KEY_PASSWORD }}
+        cd android
+        ./gradlew assembleRelease
+
+    - name: Sign APK
+      id: sign_app
+      uses: r0adkll/sign-android-release@v1
+      with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
     - name: Upload Android Capacitor build
       uses: actions/upload-artifact@v3.0.0
